@@ -5,29 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Плейлист: Иришке</title>
     <style>
-        /* Стили оставлены как были */
         body { background-color: #0c0205; color: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; overflow: hidden; position: relative; }
-        .score-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) scale(1); background: rgba(255, 42, 95, 0.2); border: 1px solid rgba(255, 42, 95, 0.4); padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 42, 95, 0.3); z-index: 9999; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(5px); pointer-events: none; }
-        .player-container { position: relative; width: 100%; max-width: 390px; background-image: url('cover.jpg'); background-size: cover; border-radius: 25px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9); border: 1px solid rgba(255, 42, 95, 0.2); overflow: hidden; display: flex; flex-direction: column; z-index: 10; margin-top: 40px; }
+        .score-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) scale(1); background: rgba(255, 42, 95, 0.2); border: 1px solid rgba(255, 42, 95, 0.4); padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 42, 95, 0.3); z-index: 9999; display: flex; align-items: center; gap: 6px; user-select: none; transition: transform 0.1s ease, border-color 0.1s ease; backdrop-filter: blur(5px); pointer-events: none; }
+        .score-container.bump { transform: translateX(-50%) scale(1.15); border-color: rgba(255, 42, 95, 0.9); background: rgba(255, 42, 95, 0.35); }
+        #score-count { color: #ff4171; font-size: 18px; font-weight: 800; text-shadow: 0 0 8px rgba(255, 65, 113, 0.8); }
+        .player-container { position: relative; width: 100%; max-width: 390px; background-image: url('cover.jpg'); background-size: cover; background-position: center; border-radius: 25px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9); border: 1px solid rgba(255, 42, 95, 0.2); overflow: hidden; display: flex; flex-direction: column; z-index: 10; margin-top: 40px; }
         .player-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(18, 3, 7, 0.4) 0%, rgba(18, 3, 7, 0.85) 100%); z-index: 1; }
         .header { position: relative; z-index: 2; text-align: center; padding: 25px 20px 10px 20px; }
+        .header h1 { font-size: 28px; margin: 0 0 3px 0; color: #fff; font-weight: 800; }
         .controls-area { position: relative; z-index: 2; padding: 10px 20px 20px 20px; display: flex; flex-direction: column; }
-        
-        /* ВАША КНОПКА И СКРЫТИЕ */
-        #toggle-playlist { width: 100%; margin-bottom: 15px; padding: 10px; background: rgba(255, 42, 95, 0.2); color: #fff; border: 1px solid rgba(255, 42, 95, 0.4); border-radius: 8px; cursor: pointer; }
-        .playlist.hidden { display: none; }
-        
-        /* Остальной CSS визуализатора и плеера */
         .visualizer-area { width: 100%; height: 60px; background: rgba(0, 0, 0, 0.5); border-radius: 14px; display: flex; align-items: flex-end; padding: 8px; margin-bottom: 15px; }
+        .bar { flex-grow: 1; margin: 0 1px; height: 4px; border-radius: 2px 2px 0 0; }
         .controls { display: flex; justify-content: center; gap: 25px; margin-bottom: 15px; }
         .btn-play { background: linear-gradient(135deg, #ff4171, #d0003c); width: 54px; height: 54px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; border: none; cursor: pointer; }
-        .track-item { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 4px; background-color: rgba(0, 0, 0, 0.3); font-size: 13px; }
+        .playlist { list-style: none; padding: 0; margin: 0; max-height: 140px; overflow-y: auto; border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 8px; }
+        .playlist.hidden { display: none; }
+        #toggle-playlist { width: 100%; margin-bottom: 15px; padding: 8px; background: rgba(255, 42, 95, 0.2); color: #fff; border: 1px solid rgba(255, 42, 95, 0.4); border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
-
 <div class="score-container" id="score-box"><span>Поймано сердечек:</span><span id="score-count">0</span></div>
-
 <div class="player-container">
     <div class="player-overlay"></div>
     <div class="header"><h1>Иришке</h1></div>
@@ -35,27 +32,24 @@
         <div class="visualizer-area" id="visualizer"></div>
         <div class="controls">
             <button class="btn" id="btn-prev">⏮</button>
-            <button class="btn-play" id="btn-play">▶</button>
+            <button class="btn btn-play" id="btn-play">▶</button>
             <button class="btn" id="btn-next">⏭</button>
         </div>
         <audio id="audio-player"></audio>
-
-        <button id="toggle-playlist">Скрыть/Показать список</button>
-        
+        <button id="toggle-playlist">Показать/Скрыть список</button>
         <ul class="playlist hidden" id="playlist-container"></ul>
     </div>
 </div>
-
 <script>
-    // Вставьте СЮДА ВЕСЬ ваш оригинальный JS-код (от const tracks = ... до initPlaylist();)
+    const tracks = [{ id: 1, title: "Заезженный диск", duration: "4:01", file: "track1.mp3" }, { id: 2, title: "сумасшедший саксофон", duration: "4:39", file: "track2.mp3" }, { id: 3, title: "Девчонка с картинки", duration: "3:53", file: "track3.mp3" }, { id: 4, title: "танцы на битом стекле", duration: "3:12", file: "track4.mp3" }];
+    let currentTrackIndex = 0; const numBars = 28; let score = 0;
+    const audio = document.getElementById('audio-player'), playBtn = document.getElementById('btn-play'), playlistContainer = document.getElementById('playlist-container');
     
-    // В самом конце скрипта добавьте этот код управления:
-    const toggleBtn = document.getElementById('toggle-playlist');
-    const playlistContainer = document.getElementById('playlist-container');
+    // ЛОГИКА КНОПКИ
+    document.getElementById('toggle-playlist').addEventListener('click', () => { playlistContainer.classList.toggle('hidden'); });
 
-    toggleBtn.addEventListener('click', () => {
-        playlistContainer.classList.toggle('hidden');
-    });
+    // (Здесь ваш полный оригинальный JS-код: renderVisualizer, createHeart и т.д.)
+    // Просто вставьте свой старый JS-код сюда, он будет работать вместе с кнопкой.
 </script>
 </body>
 </html>
