@@ -20,7 +20,6 @@
             position: relative;
         }
 
-        /* ЗАКРЕПЛЕННЫЙ СЧЁТЧИК */
         .score-container {
             position: fixed;
             top: 20px;
@@ -57,7 +56,6 @@
             text-shadow: 0 0 8px rgba(255, 65, 113, 0.8);
         }
 
-        /* Контейнер плеера */
         .player-container {
             position: relative;
             width: 100%;
@@ -87,7 +85,6 @@
             z-index: 1;
         }
 
-        /* КНОПКА ГАМБУРГЕР */
         .menu-toggle {
             position: absolute;
             top: 15px;
@@ -118,7 +115,6 @@
             text-align: center;
             padding: 25px 20px 10px 20px;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
-            /* даём место для кнопки справа */
             padding-right: 50px;
         }
 
@@ -271,7 +267,33 @@
             background: #ff2a5f;
         }
 
-        /* Плейлист по умолчанию скрыт */
+        /* Сообщение от Иришки */
+        #love-message {
+            margin-bottom: 12px;
+            padding: 10px 16px;
+            background: rgba(255, 65, 113, 0.25);
+            backdrop-filter: blur(8px);
+            border-radius: 20px 20px 20px 4px;
+            border: 1px solid rgba(255, 130, 160, 0.5);
+            color: #fff0f5;
+            font-size: 14px;
+            font-style: italic;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            text-align: center;
+            box-shadow: 0 0 12px rgba(255, 42, 95, 0.3);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            pointer-events: none;
+            min-height: 20px;
+        }
+
+        #love-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         .playlist {
             list-style: none;
             padding: 0;
@@ -336,12 +358,8 @@
                 transform: translateY(0) translateX(0) rotate(0deg);
                 opacity: 0;
             }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
             100% {
                 transform: translateY(-120vh) translateX(var(--random-x)) rotate(var(--random-rot));
                 opacity: 0;
@@ -359,14 +377,8 @@
         }
 
         @keyframes explode {
-            0% {
-                transform: translate(0, 0) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(var(--ex), var(--ey)) scale(0.3) rotate(var(--erot));
-                opacity: 0;
-            }
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--ex), var(--ey)) scale(0.3) rotate(var(--erot)); opacity: 0; }
         }
     </style>
 </head>
@@ -380,7 +392,6 @@
 <div class="player-container">
     <div class="player-overlay"></div>
 
-    <!-- Кнопка-гамбургер -->
     <button class="menu-toggle" id="menu-toggle" aria-label="Показать плейлист">☰</button>
 
     <div class="header">
@@ -417,7 +428,9 @@
             <span>🔊</span>
         </div>
 
-        <!-- Плейлист по умолчанию скрыт (класс hidden) -->
+        <!-- Пузырь для сообщений от Иришки -->
+        <div id="love-message"></div>
+
         <ul class="playlist hidden" id="playlist-container"></ul>
     </div>
 </div>
@@ -428,6 +441,20 @@
         { id: 2, title: "сумасшедший саксофон", duration: "4:39", file: "track2.mp3" },
         { id: 3, title: "Девчонка с картинки", duration: "3:53", file: "track3.mp3" },
         { id: 4, title: "танцы на битом стекле", duration: "3:12", file: "track4.mp3" }
+    ];
+
+    // Сообщения от Иришки
+    const loveMessages = [
+        "Ты сегодня такая красивая 💖",
+        "Эта песня напоминает о тебе 🎵",
+        "Улыбнись, у тебя чудесная улыбка :)",
+        "С тобой даже тишина звучит мелодией 🌙",
+        "Я рада, что ты рядом ✨",
+        "Ты моё любимое совпадение 💫",
+        "Слушай и знай: ты особенная 🌸",
+        "Твоё сердце бьётся в ритме этой музыки 💗",
+        "Никогда не забывай, как ты важна для меня 💌",
+        "Ты — лучшее, что случилось в моей жизни 🌹"
     ];
 
     let currentTrackIndex = 0;
@@ -448,24 +475,19 @@
     const scoreCount = document.getElementById('score-count');
     const scoreBox = document.getElementById('score-box');
     const menuToggle = document.getElementById('menu-toggle');
+    const loveMessageEl = document.getElementById('love-message');
 
-    // Переменные аудиоконтекста
     let audioContext = null;
     let analyser = null;
     let gainNode = null;
     let source = null;
     let animationFrameId = null;
     let heartInterval = null;
+    let messageTimeout = null;
 
-    // Переключение видимости плейлиста
     menuToggle.addEventListener('click', () => {
         playlistContainer.classList.toggle('hidden');
-        // Меняем иконку при открытии/закрытии (опционально)
-        if (playlistContainer.classList.contains('hidden')) {
-            menuToggle.innerHTML = '☰';
-        } else {
-            menuToggle.innerHTML = '✕';
-        }
+        menuToggle.innerHTML = playlistContainer.classList.contains('hidden') ? '☰' : '✕';
     });
 
     function createVisualizer() {
@@ -491,7 +513,6 @@
             gainNode.gain.value = volumeSlider.value;
 
             source = audioContext.createMediaElementSource(audio);
-
             source.connect(analyser);
             source.connect(gainNode);
             gainNode.connect(audioContext.destination);
@@ -522,6 +543,7 @@
             item.classList.toggle('active', i === index);
         });
         resetVisualizerStyles();
+        // При смене трека сообщение не показываем сразу, оно появится по таймеру
     }
 
     function loadAndPlayTrack(index) {
@@ -644,6 +666,46 @@
         if (heartInterval) clearInterval(heartInterval);
     }
 
+    // --- Сообщения от Иришки ---
+    function showLoveMessage() {
+        // Выбираем случайное сообщение
+        const msg = loveMessages[Math.floor(Math.random() * loveMessages.length)];
+        loveMessageEl.textContent = msg;
+        loveMessageEl.classList.add('show');
+
+        // Убираем сообщение через 4 секунды
+        clearTimeout(messageTimeout);
+        messageTimeout = setTimeout(() => {
+            loveMessageEl.classList.remove('show');
+        }, 4000);
+    }
+
+    function scheduleNextMessage() {
+        // Следующее сообщение через 15-25 секунд
+        const delay = Math.random() * 10000 + 15000; // 15-25 сек
+        messageTimeout = setTimeout(() => {
+            showLoveMessage();
+            // Рекурсивно планируем следующее, только если музыка играет
+            if (!audio.paused) {
+                scheduleNextMessage();
+            }
+        }, delay);
+    }
+
+    function startLoveMessages() {
+        // Показываем первое сообщение почти сразу (через 2 сек)
+        clearTimeout(messageTimeout);
+        messageTimeout = setTimeout(() => {
+            showLoveMessage();
+            scheduleNextMessage();
+        }, 2000);
+    }
+
+    function stopLoveMessages() {
+        clearTimeout(messageTimeout);
+        loveMessageEl.classList.remove('show');
+    }
+
     function playTrack() {
         initAudioContext();
         if (audioContext && audioContext.state === 'suspended') {
@@ -654,6 +716,7 @@
             playBtn.innerText = '⏸';
             renderVisualizer();
             startHearts();
+            startLoveMessages();
         }).catch(() => {
             playBtn.innerText = '⏸';
         });
@@ -664,6 +727,7 @@
         playBtn.innerText = '▶';
         resetVisualizerStyles();
         stopHearts();
+        stopLoveMessages();
     }
 
     playBtn.addEventListener('click', () => {
@@ -708,6 +772,7 @@
         }
     });
 
+    // Инициализация
     createVisualizer();
     initPlaylist();
 </script>
