@@ -313,9 +313,9 @@
     const timeCurrent = document.getElementById('time-current');
     const timeDuration = document.getElementById('time-duration');
 
-    // Переменные для НАСТОЯЩЕГО аудио-анализатора
     let audioContext;
     let analyser;
+    let gainNode; // Специальный узел для независимого управления громкостью
     let source;
     let animationFrameId;
 
@@ -332,16 +332,25 @@
         }
     }
 
-    // Инициализация аудио-контекста при первом клике (требование безопасности браузеров)
+    // Новая независимая схема подключения узлов
     function initAudioContext() {
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioContext.createAnalyser();
-            analyser.fftSize = 64; // Чем меньше число, тем шире полосы эквалайзера
+            analyser.fftSize = 64; 
+            
+            // Создаем узел громкости звука
+            gainNode = audioContext.createGain();
+            gainNode.gain.value = volumeSlider.value; // Берем начальное значение ползунка
             
             source = audioContext.createMediaElementSource(audio);
+            
+            // ПАРАЛЛЕЛЯМ: источник идет в анализатор напрямую (на полную мощность всегда)
             source.connect(analyser);
-            analyser.connect(audioContext.destination);
+            
+            // Источник также идет в регулятор громкости, а затем в динамики
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
         }
     }
 
@@ -376,7 +385,6 @@
         playTrack(); 
     }
 
-    // Функция отрисовки РЕАЛЬНЫХ частот звука
     function renderVisualizer() {
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
@@ -387,10 +395,10 @@
             analyser.getByteFrequencyData(dataArray);
 
             bars.forEach((bar, index) => {
-                // Извлекаем данные и масштабируем под высоту блока (макс 52px)
                 const value = dataArray[index] || 0;
-                const percentHeight = (value / 255) * 52; 
-                const finalHeight = Math.max(4, percentHeight); // минимум 4px
+                // Чуть-чуть увеличим чувствительность анализатора, так как он теперь не зависит от общей громкости
+                const percentHeight = (value / 255) * 55; 
+                const finalHeight = Math.max(4, percentHeight);
                 bar.style.height = `${finalHeight}px`;
             });
         }
@@ -404,7 +412,6 @@
     }
 
     function playTrack() {
-        // Запускаем аудио-движок при взаимодействии
         initAudioContext();
         if (audioContext && audioContext.state === 'suspended') {
             audioContext.resume();
@@ -438,11 +445,18 @@
     });
     
     progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
-    volumeSlider.addEventListener('input', (e) => { audio.volume = e.target.value; });
+    
+    // Регулируем громкость через узел AudioContext, чтобы не ломать анимацию
+    volumeSlider.addEventListener('input', (e) => {
+        if (gainNode) {
+            gainNode.gain.value = e.target.value;
+        } else {
+            audio.volume = e.target.value;
+        }
+    });
 
     createVisualizer();
     initPlaylist();
-    audio.volume = volumeSlider.value;
 </script>
 </body>
 </html>
