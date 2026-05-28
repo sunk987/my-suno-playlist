@@ -16,6 +16,8 @@
             align-items: center;
             min-height: 100vh;
             box-sizing: border-box;
+            overflow: hidden; /* Чтобы летающие сердечки не создавали полос прокрутки на экране */
+            position: relative;
         }
 
         /* Главный контейнер плеера */
@@ -34,6 +36,7 @@
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
+            z-index: 10; /* Плеер всегда поверх летающих сердечек */
         }
 
         /* Слой затемнения фона */
@@ -245,6 +248,37 @@
             font-size: 11px;
             color: #cccccc;
         }
+
+        /* СТИЛИ ДЛЯ ЛЕТАЮЩИХ СЕРДЕЧЕК */
+        .heart {
+            position: absolute;
+            bottom: -20px;
+            color: rgba(255, 65, 113, 0.65); /* Красивый полупрозрачный розовый цвет */
+            font-size: 20px;
+            user-select: none;
+            pointer-events: none;
+            z-index: 1; /* Позади плеера */
+            animation: flyUp linear forwards;
+            will-change: transform, opacity;
+        }
+
+        @keyframes flyUp {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                /* Улетают вверх за границы экрана, покачиваясь в стороны */
+                transform: translateY(-105vh) translateX(var(--random-x)) rotate(var(--random-rot));
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -315,9 +349,10 @@
 
     let audioContext;
     let analyser;
-    let gainNode; // Специальный узел для независимого управления громкостью
+    let gainNode; 
     let source;
     let animationFrameId;
+    let heartInterval; // Интервал для генерации сердечек
 
     function createVisualizer() {
         visualizer.innerHTML = '';
@@ -332,23 +367,18 @@
         }
     }
 
-    // Новая независимая схема подключения узлов
     function initAudioContext() {
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioContext.createAnalyser();
             analyser.fftSize = 64; 
             
-            // Создаем узел громкости звука
             gainNode = audioContext.createGain();
-            gainNode.gain.value = volumeSlider.value; // Берем начальное значение ползунка
+            gainNode.gain.value = volumeSlider.value; 
             
             source = audioContext.createMediaElementSource(audio);
             
-            // ПАРАЛЛЕЛЯМ: источник идет в анализатор напрямую (на полную мощность всегда)
             source.connect(analyser);
-            
-            // Источник также идет в регулятор громкости, а затем в динамики
             source.connect(gainNode);
             gainNode.connect(audioContext.destination);
         }
@@ -396,7 +426,6 @@
 
             bars.forEach((bar, index) => {
                 const value = dataArray[index] || 0;
-                // Чуть-чуть увеличим чувствительность анализатора, так как он теперь не зависит от общей громкости
                 const percentHeight = (value / 255) * 55; 
                 const finalHeight = Math.max(4, percentHeight);
                 bar.style.height = `${finalHeight}px`;
@@ -411,6 +440,47 @@
         bars.forEach(bar => bar.style.height = '4px');
     }
 
+    // ГЕНЕРАТОР СЕРДЕЧЕК
+    function createHeart() {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        heart.innerHTML = '❤️';
+        
+        // Случайная позиция по горизонтали во всю ширину экрана
+        heart.style.left = Math.random() * 100 + 'vw';
+        
+        // Случайный размер сердечка (от 12px до 28px)
+        const size = Math.random() * 16 + 12;
+        heart.style.fontSize = size + 'px';
+        
+        // Случайное время полета (от 4 до 8 секунд)
+        const duration = Math.random() * 4 + 4;
+        heart.style.animationDuration = duration + 's';
+        
+        // Случайные параметры покачивания и поворота через CSS переменные
+        const randomX = (Math.random() * 150 - 75) + 'px';
+        const randomRot = (Math.random() * 100 - 50) + 'deg';
+        heart.style.setProperty('--random-x', randomX);
+        heart.style.setProperty('--random-rot', randomRot);
+        
+        document.body.appendChild(heart);
+        
+        // Удаляем сердечко из кода после завершения анимации, чтобы страница не тормозила
+        setTimeout(() => {
+            heart.remove();
+        }, duration * 1000);
+    }
+
+    function startHearts() {
+        if (heartInterval) clearInterval(heartInterval);
+        // Создаем новое сердечко каждые 400 миллисекунд
+        heartInterval = setInterval(createHeart, 400);
+    }
+
+    function stopHearts() {
+        if (heartInterval) clearInterval(heartInterval);
+    }
+
     function playTrack() {
         initAudioContext();
         if (audioContext && audioContext.state === 'suspended') {
@@ -420,6 +490,7 @@
         audio.play().then(() => { 
             playBtn.innerText = '⏸'; 
             renderVisualizer(); 
+            startHearts(); // Сердечки летят, когда музыка играет
         }).catch(() => { 
             playBtn.innerText = '⏸'; 
         });
@@ -429,6 +500,7 @@
         audio.pause(); 
         playBtn.innerText = '▶'; 
         resetVisualizerStyles(); 
+        stopHearts(); // Сердечки замирают, когда пауза
     }
 
     playBtn.addEventListener('click', () => { if (audio.paused) playTrack(); else pauseTrack(); });
@@ -446,7 +518,6 @@
     
     progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
     
-    // Регулируем громкость через узел AudioContext, чтобы не ломать анимацию
     volumeSlider.addEventListener('input', (e) => {
         if (gainNode) {
             gainNode.gain.value = e.target.value;
