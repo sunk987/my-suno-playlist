@@ -2,91 +2,119 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Иришке</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Плейлист: Иришке</title>
     <style>
-        /* Главная настройка: колонка, а не центр */
-        body { 
-            background: #0c0205; 
-            color: white; 
-            font-family: sans-serif; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; /* ВАЖНО: элементы друг под другом */
-            align-items: center; 
-            min-height: 100vh; 
+        body {
+            background-color: #0c0205;
+            color: #ffffff;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column; /* Плеер и игра строго друг под другом */
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden; /* Чтобы сердечки не создавали полосу прокрутки */
         }
-        
-        /* Плеер занимает мало места */
-        .player-container { 
-            width: 90%; 
-            max-width: 390px; 
-            background: #1a050b; 
-            border: 1px solid #ff4171; 
-            border-radius: 20px; 
-            padding: 15px; 
-            margin-top: 10px; 
-            text-align: center; 
-            flex-shrink: 0; /* Не дает плееру сжиматься */
+
+        /* Плеер: фиксированный размер сверху */
+        .player-container {
+            width: 100%;
+            max-width: 390px;
+            background-image: url('cover.jpg');
+            background-size: cover;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+            border: 1px solid rgba(255, 42, 95, 0.2);
+            overflow: hidden;
+            z-index: 100; /* Плеер всегда поверх сердечек */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
+
+        .controls-area { padding: 20px; background: rgba(0,0,0,0.7); }
+        .btn-play { background: #ff4171; border: none; color: white; width: 50px; height: 50px; border-radius: 50%; font-size: 20px; cursor: pointer; }
         
-        .btn-play { background: #ff4171; border: none; padding: 10px 20px; border-radius: 20px; color: white; cursor: pointer; }
-        
-        /* Игровая зона занимает всё остальное место */
-        #game-area { 
-            width: 100%; 
-            flex-grow: 1; /* Растягивается на остаток экрана */
-            position: relative; 
-            overflow: hidden; 
+        /* СЧЕТЧИК */
+        .score-container { margin: 15px 0; color: #ff4171; font-weight: bold; }
+
+        /* ИГРА: занимает всё оставшееся место внизу */
+        #game-area {
+            width: 100%;
+            flex-grow: 1; /* Растягивается на всё доступное пространство */
+            position: relative;
+            z-index: 1; /* Сердечки под плеером */
         }
-        
-        .heart { position: absolute; font-size: 30px; cursor: pointer; animation: flyUp 6s linear forwards; }
-        @keyframes flyUp { from { bottom: 0; opacity: 1; } to { bottom: 100%; opacity: 0; } }
+
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            color: #ff4171;
+            cursor: pointer;
+            animation: flyUp linear forwards;
+            padding: 10px;
+        }
+
+        @keyframes flyUp {
+            to { transform: translateY(-100vh); opacity: 0; }
+        }
     </style>
 </head>
 <body>
 
 <div class="player-container">
-    <h3 style="margin:0;">Иришке</h3>
-    <button class="btn-play" id="btn-play">▶ Play</button>
-    <div style="margin-top:5px;">Сердечек: <span id="score">0</span></div>
-    <audio id="audio" src="track1.mp3"></audio>
+    <div class="controls-area">
+        <h1 style="text-align:center; margin:0 0 10px 0;">Иришке</h1>
+        <div style="text-align:center;">
+            <button class="btn-play" id="btn-play">▶</button>
+        </div>
+        <div class="score-container" style="text-align:center;">
+            Поймано сердечек: <span id="score-count">0</span>
+        </div>
+        <audio id="audio-player" src="track1.mp3"></audio>
+    </div>
 </div>
 
 <div id="game-area"></div>
 
 <script>
-    const audio = document.getElementById('audio');
+    const audio = document.getElementById('audio-player');
     const playBtn = document.getElementById('btn-play');
-    const scoreEl = document.getElementById('score');
+    const scoreCount = document.getElementById('score-count');
     const gameArea = document.getElementById('game-area');
     let score = 0;
-    let gameInterval;
+    let heartInterval;
 
     playBtn.onclick = () => {
         if (audio.paused) {
-            audio.play().catch(e => alert("Нажми Play!"));
-            playBtn.innerText = "⏸ Pause";
-            // Запускаем сердечки
-            gameInterval = setInterval(spawnHeart, 800);
+            audio.play();
+            playBtn.innerText = '⏸';
+            heartInterval = setInterval(createHeart, 800);
         } else {
             audio.pause();
-            playBtn.innerText = "▶ Play";
-            clearInterval(gameInterval);
+            playBtn.innerText = '▶';
+            clearInterval(heartInterval);
         }
     };
 
-    function spawnHeart() {
+    function createHeart() {
         const heart = document.createElement('div');
         heart.innerHTML = '❤️';
         heart.className = 'heart';
-        heart.style.left = Math.random() * 80 + 'vw';
+        // Появление в случайном месте по горизонтали
+        heart.style.left = (Math.random() * 90 + 5) + 'vw';
+        // Случайный размер (15-25px)
+        heart.style.fontSize = (Math.random() * 10 + 15) + 'px';
+        // Случайная скорость
+        heart.style.animationDuration = (Math.random() * 5 + 7) + 's';
+
         heart.onclick = () => {
             score++;
-            scoreEl.innerText = score;
+            scoreCount.innerText = score;
             heart.remove();
         };
+
         gameArea.appendChild(heart);
-        setTimeout(() => heart.remove(), 6000);
+        setTimeout(() => heart.remove(), 12000);
     }
 </script>
 </body>
