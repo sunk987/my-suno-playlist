@@ -5,81 +5,165 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Плейлист: Иришке</title>
     <style>
-        body { background-color: #0c0205; color: #fff; font-family: sans-serif; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        
-        /* КРАСИВЫЙ ПЛЕЕР (Ваш исходный дизайн) */
-        .player-container { width: 100%; max-width: 390px; background-image: url('cover.jpg'); background-size: cover; border-radius: 25px; padding: 20px; border: 1px solid #ff4171; text-align: center; position: relative; overflow: hidden; }
-        .player-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.6); z-index: 1; }
-        .content { position: relative; z-index: 2; }
-        
-        .visualizer { display: flex; justify-content: center; gap: 5px; height: 30px; margin: 15px 0; align-items: flex-end; }
-        .bar { width: 6px; background: #ff4171; border-radius: 3px; }
-        
-        .playlist { list-style: none; padding: 0; margin: 15px 0; text-align: left; }
-        .track-item { padding: 8px; border-bottom: 1px solid #333; cursor: pointer; }
+        body {
+            background-color: #0c0205;
+            color: #ffffff;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
 
-        /* ЗОНА ИГРЫ (внизу) */
-        #game-area { width: 100%; max-width: 390px; flex-grow: 1; position: relative; margin-top: 20px; border-top: 2px solid #ff4171; }
-        .heart { position: absolute; font-size: 30px; cursor: pointer; animation: flyUp 6s linear forwards; }
-        @keyframes flyUp { from { bottom: 0; opacity: 1; } to { bottom: 100%; opacity: 0; } }
+        /* ЗАКРЕПЛЕННЫЙ СЧЁТЧИК */
+        .score-container {
+            position: fixed; 
+            top: 20px;       
+            left: 50%;
+            transform: translateX(-50%) scale(1); 
+            background: rgba(255, 42, 95, 0.2);
+            border: 1px solid rgba(255, 42, 95, 0.4);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 42, 95, 0.3);
+            z-index: 9999; 
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: none;
+            backdrop-filter: blur(5px);
+            transition: transform 0.1s ease;
+        }
+        .score-container.bump { transform: translateX(-50%) scale(1.15); }
+        #score-count { color: #ff4171; font-size: 18px; font-weight: 800; }
+
+        /* КОНТЕЙНЕР ПЛЕЕРА */
+        .player-wrapper {
+            width: 100%;
+            max-width: 390px;
+            margin-top: 20px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .player-container {
+            position: relative;
+            width: 100%;
+            background-image: url('cover.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 42, 95, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .player-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(18, 3, 7, 0.4) 0%, rgba(18, 3, 7, 0.85) 100%); z-index: 1; }
+        .header, .controls-area { position: relative; z-index: 2; padding: 20px; }
+        .header { text-align: center; padding-bottom: 0; }
+        .visualizer-area { height: 60px; background: rgba(0, 0, 0, 0.5); border-radius: 14px; display: flex; align-items: flex-end; padding: 8px; margin: 15px 0; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .bar { flex-grow: 1; margin: 0 1px; height: 4px; border-radius: 2px 2px 0 0; }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 25px; margin-bottom: 15px; }
+        .btn { background: none; border: none; color: #fff; cursor: pointer; font-size: 24px; }
+        .btn-play { background: linear-gradient(135deg, #ff4171, #d0003c); width: 54px; height: 54px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; }
+        .playlist { list-style: none; padding: 0; margin: 15px 0 0 0; max-height: 120px; overflow-y: auto; border-top: 1px solid rgba(255,255,255,0.1); }
+        .track-item { padding: 8px; cursor: pointer; font-size: 13px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-top: 5px; }
+        .track-item.active { border-left: 3px solid #ff2a5f; background: rgba(255, 42, 95, 0.2); }
+
+        /* ИГРОВАЯ ЗОНА */
+        #game-area { width: 100%; flex-grow: 1; position: relative; margin-top: 10px; }
+        .heart { position: absolute; bottom: -50px; font-size: 26px; cursor: pointer; z-index: 999; animation: flyUp linear forwards; padding: 15px; }
+        @keyframes flyUp { 100% { transform: translateY(-120vh); opacity: 0; } }
+        .sparkle { position: absolute; pointer-events: none; z-index: 1000; font-size: 14px; animation: explode 0.5s ease-out forwards; }
+        @keyframes explode { to { transform: scale(0.3); opacity: 0; } }
     </style>
 </head>
 <body>
 
-<div class="player-container">
-    <div class="player-overlay"></div>
-    <div class="content">
-        <h1>Иришке</h1>
-        <h3 id="current-title">Заезженный диск</h3>
-        <div class="visualizer" id="viz"></div>
-        <button id="btn-play" style="padding:10px 30px; border-radius:20px; border:none; background:#ff4171; color:white; cursor:pointer;">▶ Play</button>
-        <div style="margin-top:10px;">Сердечек: <span id="score">0</span></div>
-        <ul class="playlist">
-            <li class="track-item">1. Заезженный диск</li>
-            <li class="track-item">2. Сумасшедший саксофон</li>
-        </ul>
-        <audio id="audio" src="track1.mp3"></audio>
+<div class="score-container" id="score-box">
+    <span>Поймано сердечек:</span>
+    <span id="score-count">0</span>
+</div>
+
+<div class="player-wrapper">
+    <div class="player-container">
+        <div class="player-overlay"></div>
+        <div class="header">
+            <h1>Иришке</h1>
+        </div>
+        <div class="controls-area">
+            <h3 id="current-title" style="text-align:center;">Загрузка...</h3>
+            <div class="visualizer-area" id="visualizer"></div>
+            <div class="controls">
+                <button class="btn" id="btn-prev">⏮</button>
+                <button class="btn btn-play" id="btn-play">▶</button>
+                <button class="btn" id="btn-next">⏭</button>
+            </div>
+            <audio id="audio-player" src=""></audio>
+            <ul class="playlist" id="playlist-container"></ul>
+        </div>
     </div>
 </div>
 
 <div id="game-area"></div>
 
 <script>
-    const audio = document.getElementById('audio');
-    const playBtn = document.getElementById('btn-play');
-    const scoreEl = document.getElementById('score');
-    const gameArea = document.getElementById('game-area');
-    const viz = document.getElementById('viz');
-    let score = 0;
+    const tracks = [
+        { title: "Заезженный диск", file: "track1.mp3" },
+        { title: "сумасшедший саксофон", file: "track2.mp3" },
+        { title: "Девчонка с картинки", file: "track3.mp3" }
+    ];
 
-    // Столбики эквалайзера
-    for(let i=0; i<10; i++) {
+    let score = 0;
+    const audio = document.getElementById('audio-player');
+    const playBtn = document.getElementById('btn-play');
+    const gameArea = document.getElementById('game-area');
+    const scoreCount = document.getElementById('score-count');
+
+    // Инициализация визуализатора
+    const viz = document.getElementById('visualizer');
+    for(let i=0; i<20; i++) {
         const bar = document.createElement('div');
         bar.className = 'bar';
-        bar.style.height = '10px';
+        bar.style.backgroundColor = '#ff4171';
         viz.appendChild(bar);
     }
 
     playBtn.onclick = () => {
         if (audio.paused) {
             audio.play();
-            playBtn.innerText = "⏸ Pause";
-            setInterval(() => document.querySelectorAll('.bar').forEach(b => b.style.height = Math.random()*30 + 5 + 'px'), 200);
-            setInterval(spawnHeart, 1000);
+            playBtn.innerText = '⏸';
+            startHearts();
         } else {
             audio.pause();
-            playBtn.innerText = "▶ Play";
+            playBtn.innerText = '▶';
+            clearInterval(window.heartInterval);
         }
     };
 
-    function spawnHeart() {
-        const heart = document.createElement('div');
-        heart.innerHTML = '❤️';
-        heart.className = 'heart';
-        heart.style.left = Math.random() * 80 + '%';
-        heart.onclick = () => { score++; scoreEl.innerText = score; heart.remove(); };
-        gameArea.appendChild(heart);
-        setTimeout(() => heart.remove(), 6000);
+    function startHearts() {
+        window.heartInterval = setInterval(() => {
+            const heart = document.createElement('div');
+            heart.innerHTML = '❤️';
+            heart.className = 'heart';
+            heart.style.left = Math.random() * 90 + 'vw';
+            heart.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            
+            heart.onclick = () => {
+                score++;
+                scoreCount.innerText = score;
+                heart.remove();
+            };
+            
+            gameArea.appendChild(heart);
+            setTimeout(() => heart.remove(), 10000);
+        }, 800);
     }
 </script>
 </body>
