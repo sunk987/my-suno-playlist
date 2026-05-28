@@ -31,24 +31,25 @@
             flex-direction: column;
         }
 
-        /* ЗОНА С РОЗОЙ: Занимает фиксированную высоту, картинка точно отобразится */
+        /* ЗОНА С РОЗОЙ: Оптимизирована под вертикальный скриншот cover.jpg */
         .cover-area {
             position: relative;
             width: 100%;
-            height: 280px; /* Фиксированная высота для фото */
-            background-image: url('cover.jpg'); /* Ваша роза из GitHub */
+            height: 340px; /* Увеличили высоту, чтобы клетка с розой влезла */
+            background-image: url('cover.jpg');
             background-size: cover;
-            background-position: center;
+            /* Центрируем картинку и смещаем фокус чуть выше, чтобы показать розу */
+            background-position: center 32%; 
             background-repeat: no-repeat;
-            background-color: #20050d; /* Запасной цвет, если картинка долго грузится */
+            background-color: #20050d;
         }
 
-        /* Плавное затемнение картинки к низу */
+        /* Мягкое затемнение от розы к кнопкам управления */
         .cover-area::after {
             content: '';
             position: absolute;
             left: 0; bottom: 0; right: 0;
-            height: 50px;
+            height: 60px;
             background: linear-gradient(to top, #120307, transparent);
         }
 
@@ -78,7 +79,7 @@
 
         /* ЗОНА УПРАВЛЕНИЯ СНИЗУ */
         .controls-area {
-            padding: 20px;
+            padding: 15px 20px 20px 20px;
             display: flex;
             flex-direction: column;
             background: #120307;
@@ -86,7 +87,7 @@
 
         .current-track-info {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         #current-title {
@@ -108,14 +109,14 @@
             justify-content: space-between;
             padding: 8px;
             box-sizing: border-box;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             border: 1px solid rgba(255, 255, 255, 0.02);
         }
 
         .bar {
             flex-grow: 1;
             margin: 0 1px;
-            height: 4px; /* Стартовая высота */
+            height: 4px;
             border-radius: 2px 2px 0 0;
             transition: height 0.1s ease;
         }
@@ -126,7 +127,7 @@
             justify-content: center;
             align-items: center;
             gap: 25px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .btn {
@@ -161,7 +162,7 @@
             gap: 10px;
             font-size: 11px;
             color: #b3b3b3;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .progress-bar-wrapper {
@@ -223,7 +224,7 @@
             list-style: none;
             padding: 0;
             margin: 0;
-            max-height: 130px;
+            max-height: 120px;
             overflow-y: auto;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding-top: 8px;
@@ -312,7 +313,7 @@
 
     let currentTrackIndex = 0;
     let visualizerInterval;
-    const numBars = 28; // Количество разноцветных полос
+    const numBars = 28;
     
     const audio = document.getElementById('audio-player');
     const playBtn = document.getElementById('btn-play');
@@ -326,14 +327,13 @@
     const timeCurrent = document.getElementById('time-current');
     const timeDuration = document.getElementById('time-duration');
 
-    // Создаем разноцветные полосы
     function createVisualizer() {
         visualizer.innerHTML = '';
         for (let i = 0; i < numBars; i++) {
             const bar = document.createElement('div');
             bar.classList.add('bar');
             
-            // Плавный переход цвета от бордового к фиолетовому и синему
+            // Красивый градиентный перелив цветов спектра
             const hue = 330 + (i * (70 / numBars)); 
             bar.style.backgroundColor = `hsl(${hue}, 95%, 55%)`;
             bar.style.boxShadow = `0 0 4px hsl(${hue}, 95%, 50%)`;
@@ -406,7 +406,6 @@
             playBtn.innerText = '⏸';
             startVisualizer();
         }).catch(err => {
-            // Запасной запуск анимации для теста
             playBtn.innerText = '⏸';
             startVisualizer();
         });
