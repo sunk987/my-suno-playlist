@@ -12,7 +12,6 @@
             margin: 0;
             padding: 10px;
             display: flex;
-            flex-direction: column; /* Изменили на column, чтобы счётчик встал НАД плеером */
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -21,37 +20,41 @@
             position: relative;
         }
 
-        /* СТИЛЬНЫЙ СЧЁТЧИК ИГРЫ */
+        /* ЖЕСТКО ЗАКРЕПИЛИ СЧЁТЧИК ВВЕРХУ ЭКРАНА */
         .score-container {
-            margin-bottom: 15px;
-            background: rgba(255, 42, 95, 0.1);
-            border: 1px solid rgba(255, 42, 95, 0.3);
-            padding: 6px 16px;
+            position: fixed; /* Закреплен на одном месте */
+            top: 20px;       /* Отступ от верхнего края экрана */
+            left: 50%;
+            transform: translateX(-50%) scale(1); /* Центровка по горизонтали */
+            background: rgba(255, 42, 95, 0.2);
+            border: 1px solid rgba(255, 42, 95, 0.4);
+            padding: 8px 18px;
             border-radius: 20px;
             font-size: 14px;
             font-weight: 600;
             letter-spacing: 0.5px;
-            box-shadow: 0 0 15px rgba(255, 42, 95, 0.2);
-            z-index: 20; /* Выше летающих сердечек */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 42, 95, 0.3);
+            z-index: 9999; /* Самый высокий слой, выше сердечек и плеера! */
             display: flex;
             align-items: center;
             gap: 6px;
             user-select: none;
-            transition: transform 0.1s ease;
+            transition: transform 0.1s ease, border-color 0.1s ease;
+            backdrop-filter: blur(5px); /* Легкое размытие заднего плана под счетчиком */
         }
 
         /* Анимация пульсации счётчика при поимке */
         .score-container.bump {
-            transform: scale(1.1);
-            border-color: rgba(255, 42, 95, 0.8);
-            box-shadow: 0 0 20px rgba(255, 42, 95, 0.5);
+            transform: translateX(-50%) scale(1.15); /* Не ломаем центровку при увеличении */
+            border-color: rgba(255, 42, 95, 0.9);
+            background: rgba(255, 42, 95, 0.35);
         }
 
         #score-count {
             color: #ff4171;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 800;
-            text-shadow: 0 0 8px rgba(255, 65, 113, 0.6);
+            text-shadow: 0 0 8px rgba(255, 65, 113, 0.8);
         }
 
         /* Главный контейнер плеера */
@@ -71,6 +74,7 @@
             flex-direction: column;
             box-sizing: border-box;
             z-index: 10;
+            margin-top: 40px; /* Сделали отступ, чтобы плеер не упирался в счетчик */
         }
 
         /* Слой затемнения фона */
@@ -397,7 +401,7 @@
 
     let currentTrackIndex = 0;
     const numBars = 28;
-    let score = 0; // Переменная для подсчёта очков
+    let score = 0; 
     
     const audio = document.getElementById('audio-player');
     const playBtn = document.getElementById('btn-play');
@@ -412,6 +416,13 @@
     const timeDuration = document.getElementById('time-duration');
     const scoreCount = document.getElementById('score-count');
     const scoreBox = document.getElementById('score-box');
+
+    let audioContext;
+    let analyser;
+    let gainNode; 
+    let source;
+    let animationFrameId;
+    let heartInterval; 
 
     function createVisualizer() {
         visualizer.innerHTML = '';
@@ -561,11 +572,9 @@
             createExplosion(centerX, centerY);
             heart.remove();
 
-            // ОБНОВЛЕНИЕ СЧЁТЧИКА ПРИ ЛОПАНИИ
             score++;
             scoreCount.innerText = score;
 
-            // Добавляем микро-пульсацию плашке с цифрами
             scoreBox.classList.add('bump');
             setTimeout(() => {
                 scoreBox.classList.remove('bump');
