@@ -629,6 +629,41 @@
 
     createVisualizer();
     initPlaylist();
+    // Логика переключения по долгому нажатию на название
+const titleElement = document.getElementById('current-title');
+let longPressTimer;
+
+titleElement.addEventListener('touchstart', (e) => {
+    // Запускаем таймер на 2 секунды
+    longPressTimer = setTimeout(() => {
+        // Принудительная вибрация телефона (если поддерживается)
+        if (navigator.vibrate) navigator.vibrate(200);
+        
+        // Переключаем трек
+        let index = currentTrackIndex + 1;
+        if (index >= tracks.length) index = 0;
+        loadAndPlayTrack(index);
+    }, 2000);
+});
+
+titleElement.addEventListener('touchend', () => {
+    // Если отпустили палец раньше 2 секунд, просто сбрасываем таймер
+    clearTimeout(longPressTimer);
+});
+
+// Добавляем поддержку для мыши (если вдруг откроют на компьютере)
+titleElement.addEventListener('mousedown', (e) => {
+    longPressTimer = setTimeout(() => {
+        let index = currentTrackIndex + 1;
+        if (index >= tracks.length) index = 0;
+        loadAndPlayTrack(index);
+    }, 2000);
+});
+
+titleElement.addEventListener('mouseup', () => {
+    clearTimeout(longPressTimer);
+});
+    
 </script>
 </body>
 </html>
