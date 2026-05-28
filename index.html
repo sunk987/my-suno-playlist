@@ -5,75 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Плейлист для Иришки</title>
     <style>
-        body {
-            background-color: #0c0205;
-            color: #ffffff;
-            font-family: sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .player-container {
-            width: 100%;
-            max-width: 390px;
-            background: #1a050b;
-            border-radius: 25px;
-            padding: 20px;
-            border: 1px solid #ff4171;
-            text-align: center;
-            z-index: 10;
-        }
-
-        /* Счетчик сердечек */
-        #score-display { margin-top: 10px; font-weight: bold; color: #ff4171; }
-
-        /* Зона игры */
-        #game-area {
-            width: 100%;
-            flex-grow: 1;
-            position: relative;
-            margin-top: 20px;
-            min-height: 300px;
-            overflow: hidden;
-        }
-
-        button { padding: 15px 30px; cursor: pointer; border-radius: 10px; border: none; background: #ff4171; color: white; font-weight: bold; }
-
-        .heart {
-            position: absolute;
-            font-size: 30px;
-            cursor: pointer;
-            animation: flyUp 8s linear forwards;
-        }
-
-        @keyframes flyUp {
-            from { bottom: -50px; opacity: 1; }
-            to { bottom: 100vh; opacity: 0; }
-        }
-
-        .sparkle {
-            position: absolute;
-            pointer-events: none;
-            font-size: 20px;
-            animation: explode 0.5s ease-out forwards;
-        }
-
-        @keyframes explode {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(2); opacity: 0; }
-        }
+        body { background-color: #0c0205; color: white; margin: 0; padding: 10px; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        /* Плеер */
+        .player-container { width: 100%; max-width: 390px; background: #1a050b; border-radius: 25px; padding: 20px; border: 1px solid #ff4171; text-align: center; z-index: 10; }
+        
+        /* Зона игры под плеером */
+        #game-area { width: 100%; flex-grow: 1; position: relative; margin-top: 20px; overflow: hidden; }
+        
+        /* Стили сердечек и кнопок */
+        .heart { position: absolute; font-size: 30px; cursor: pointer; animation: flyUp 8s linear forwards; }
+        @keyframes flyUp { from { bottom: -50px; opacity: 1; } to { bottom: 100%; opacity: 0; } }
+        .sparkle { position: absolute; pointer-events: none; font-size: 20px; animation: explode 0.5s ease-out forwards; }
+        @keyframes explode { to { transform: scale(2); opacity: 0; } }
+        
+        button { padding: 15px 30px; background: #ff4171; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="player-container">
-    <h2 id="current-title">Иришке</h2>
+    <h1>Иришке</h1>
     <button id="btn-play">▶ Play</button>
-    <div id="score-display">Поймано сердечек: <span id="score">0</span></div>
+    <div style="margin-top:15px;">Поймано сердечек: <span id="score">0</span></div>
     <audio id="audio" src="track1.mp3"></audio>
 </div>
 
@@ -104,28 +58,24 @@
         heart.innerHTML = '❤️';
         heart.className = 'heart';
         heart.style.left = Math.random() * 80 + 'vw';
-        
         heart.onclick = (e) => {
             createExplosion(e.clientX, e.clientY);
             score++;
             scoreEl.innerText = score;
             heart.remove();
         };
-        
         gameArea.appendChild(heart);
         setTimeout(() => heart.remove(), 8000);
     }
 
     function createExplosion(x, y) {
-        for(let i=0; i<3; i++) {
-            const s = document.createElement('div');
-            s.innerHTML = '✨';
-            s.className = 'sparkle';
-            s.style.left = x + 'px';
-            s.style.top = y + 'px';
-            document.body.appendChild(s);
-            setTimeout(() => s.remove(), 500);
-        }
+        const s = document.createElement('div');
+        s.innerHTML = '✨';
+        s.className = 'sparkle';
+        s.style.left = x + 'px';
+        s.style.top = y + 'px';
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 500);
     }
 </script>
 </body>
