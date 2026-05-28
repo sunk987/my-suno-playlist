@@ -12,12 +12,46 @@
             margin: 0;
             padding: 10px;
             display: flex;
+            flex-direction: column; /* Изменили на column, чтобы счётчик встал НАД плеером */
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             box-sizing: border-box;
             overflow: hidden;
             position: relative;
+        }
+
+        /* СТИЛЬНЫЙ СЧЁТЧИК ИГРЫ */
+        .score-container {
+            margin-bottom: 15px;
+            background: rgba(255, 42, 95, 0.1);
+            border: 1px solid rgba(255, 42, 95, 0.3);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 15px rgba(255, 42, 95, 0.2);
+            z-index: 20; /* Выше летающих сердечек */
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+            transition: transform 0.1s ease;
+        }
+
+        /* Анимация пульсации счётчика при поимке */
+        .score-container.bump {
+            transform: scale(1.1);
+            border-color: rgba(255, 42, 95, 0.8);
+            box-shadow: 0 0 20px rgba(255, 42, 95, 0.5);
+        }
+
+        #score-count {
+            color: #ff4171;
+            font-size: 16px;
+            font-weight: 800;
+            text-shadow: 0 0 8px rgba(255, 65, 113, 0.6);
         }
 
         /* Главный контейнер плеера */
@@ -258,7 +292,7 @@
             user-select: none;
             pointer-events: auto; 
             cursor: pointer;
-            z-index: 999; /* Поверх всего */
+            z-index: 999; 
             animation: flyUp linear forwards;
             will-change: transform, opacity;
             padding: 15px; 
@@ -286,7 +320,7 @@
         .sparkle {
             position: absolute;
             pointer-events: none;
-            z-index: 1000; /* Самый верхний слой для спецэффекта */
+            z-index: 1000; 
             font-size: 14px;
             user-select: none;
             will-change: transform, opacity;
@@ -299,7 +333,6 @@
                 opacity: 1;
             }
             100% {
-                /* Разлетаются по координатам, заданным в JS, и плавно уменьшаются */
                 transform: translate(var(--ex), var(--ey)) scale(0.3) rotate(var(--erot));
                 opacity: 0;
             }
@@ -307,6 +340,11 @@
     </style>
 </head>
 <body>
+
+<div class="score-container" id="score-box">
+    <span>Поймано сердечек:</span>
+    <span id="score-count">0</span>
+</div>
 
 <div class="player-container">
     <div class="player-overlay"></div>
@@ -359,6 +397,7 @@
 
     let currentTrackIndex = 0;
     const numBars = 28;
+    let score = 0; // Переменная для подсчёта очков
     
     const audio = document.getElementById('audio-player');
     const playBtn = document.getElementById('btn-play');
@@ -371,13 +410,8 @@
     const currentTitle = document.getElementById('current-title');
     const timeCurrent = document.getElementById('time-current');
     const timeDuration = document.getElementById('time-duration');
-
-    let audioContext;
-    let analyser;
-    let gainNode; 
-    let source;
-    let animationFrameId;
-    let heartInterval; 
+    const scoreCount = document.getElementById('score-count');
+    const scoreBox = document.getElementById('score-box');
 
     function createVisualizer() {
         visualizer.innerHTML = '';
@@ -465,38 +499,30 @@
         bars.forEach(bar => bar.style.height = '4px');
     }
 
-    // НАСТОЯЩИЙ ВЗРЫВ ИСКР
     function createExplosion(x, y) {
-        const icons = ['✨', '⭐', '⚡', '🌸']; // Набор красивых искорок
-        const sparkCount = 8; // Сколько штук вылетает за раз
+        const icons = ['✨', '⭐', '🌸', '💖']; 
+        const sparkCount = 8; 
 
         for (let i = 0; i < sparkCount; i++) {
             const spark = document.createElement('div');
             spark.classList.add('sparkle');
-            
-            // Выбираем случайную иконку из массива
             spark.innerHTML = icons[Math.floor(Math.random() * icons.length)];
-            
-            // Спавним строго в месте клика
             spark.style.left = x + 'px';
             spark.style.top = y + 'px';
 
-            // Генерируем случайный угол и дальность разлета (круг во все стороны)
             const angle = Math.random() * Math.PI * 2;
-            const distance = Math.random() * 60 + 40; // Радиус взрыва в пикселях
+            const distance = Math.random() * 60 + 40; 
             
             const ex = Math.cos(angle) * distance + 'px';
             const ey = Math.sin(angle) * distance + 'px';
             const erot = (Math.random() * 360) + 'deg';
 
-            // Передаем эти координаты в CSS анимацию
             spark.style.setProperty('--ex', ex);
             spark.style.setProperty('--ey', ey);
             spark.style.setProperty('--erot', erot);
 
             document.body.appendChild(spark);
 
-            // Удаляем искру через полсекунды, когда она полностью потухнет
             setTimeout(() => {
                 spark.remove();
             }, 500);
@@ -528,16 +554,22 @@
 
             heart.classList.add('popped');
             
-            // Находим точные координаты центра сердечка на экране в момент нажатия
             const rect = heart.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
 
-            // Запускаем праздничный салют искр!
             createExplosion(centerX, centerY);
-
-            // Удаляем само сердечко мгновенно
             heart.remove();
+
+            // ОБНОВЛЕНИЕ СЧЁТЧИКА ПРИ ЛОПАНИИ
+            score++;
+            scoreCount.innerText = score;
+
+            // Добавляем микро-пульсацию плашке с цифрами
+            scoreBox.classList.add('bump');
+            setTimeout(() => {
+                scoreBox.classList.remove('bump');
+            }, 100);
         }
 
         heart.addEventListener('touchstart', popHeart, { passive: false });
