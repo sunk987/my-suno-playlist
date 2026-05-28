@@ -23,7 +23,7 @@
             position: relative;
             width: 100%;
             max-width: 390px;
-            background-image: url('cover.jpg'); /* Четко ваш файл */
+            background-image: url('cover.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -36,7 +36,7 @@
             box-sizing: border-box;
         }
 
-        /* Плотная подложка-затемнение, чтобы роза была видна, но текст читался */
+        /* Слой затемнения фона */
         .player-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -92,7 +92,7 @@
         .visualizer-area {
             width: 100%;
             height: 60px;
-            background: rgba(0, 0, 0, 0.5); /* Сделали чуть темнее для надежности */
+            background: rgba(0, 0, 0, 0.5);
             border-radius: 14px;
             display: flex;
             align-items: flex-end;
@@ -108,7 +108,7 @@
             margin: 0 1px;
             height: 4px;
             border-radius: 2px 2px 0 0;
-            transition: height 0.1s ease;
+            will-change: height;
         }
 
         /* Кнопки управления */
@@ -270,7 +270,7 @@
             <button class="btn" id="btn-next">⏭</button>
         </div>
 
-        <audio id="audio-player" src=""></audio>
+        <audio id="audio-player" crossorigin="anonymous" src=""></audio>
 
         <div class="progress-container">
             <span id="time-current">0:00</span>
@@ -299,7 +299,6 @@
     ];
 
     let currentTrackIndex = 0;
-    let visualizerInterval;
     const numBars = 28;
     
     const audio = document.getElementById('audio-player');
@@ -314,6 +313,12 @@
     const timeCurrent = document.getElementById('time-current');
     const timeDuration = document.getElementById('time-duration');
 
+    // Переменные для НАСТОЯЩЕГО аудио-анализатора
+    let audioContext;
+    let analyser;
+    let source;
+    let animationFrameId;
+
     function createVisualizer() {
         visualizer.innerHTML = '';
         for (let i = 0; i < numBars; i++) {
@@ -322,7 +327,21 @@
             const hue = 330 + (i * (70 / numBars)); 
             bar.style.backgroundColor = `hsl(${hue}, 95%, 55%)`;
             bar.style.boxShadow = `0 0 4px hsl(${hue}, 95%, 50%)`;
+            bar.style.height = '4px';
             visualizer.appendChild(bar);
+        }
+    }
+
+    // Инициализация аудио-контекста при первом клике (требование безопасности браузеров)
+    function initAudioContext() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 64; // Чем меньше число, тем шире полосы эквалайзера
+            
+            source = audioContext.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
         }
     }
 
@@ -349,39 +368,67 @@
         document.querySelectorAll('.track-item').forEach((item, i) => {
             item.classList.toggle('active', i === index);
         });
-        resetVisualizer();
+        resetVisualizerStyles();
     }
 
-    function loadAndPlayTrack(index) { loadTrack(index); playTrack(); }
+    function loadAndPlayTrack(index) { 
+        loadTrack(index); 
+        playTrack(); 
+    }
 
-    function startVisualizer() {
-        if (visualizerInterval) clearInterval(visualizerInterval);
+    // Функция отрисовки РЕАЛЬНЫХ частот звука
+    function renderVisualizer() {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
         const bars = document.querySelectorAll('.bar');
-        visualizerInterval = setInterval(() => {
-            bars.forEach((bar) => {
-                const randomHeight = Math.floor(Math.random() * 40) + 4;
-                bar.style.height = `${randomHeight}px`;
+
+        function draw() {
+            animationFrameId = requestAnimationFrame(draw);
+            analyser.getByteFrequencyData(dataArray);
+
+            bars.forEach((bar, index) => {
+                // Извлекаем данные и масштабируем под высоту блока (макс 52px)
+                const value = dataArray[index] || 0;
+                const percentHeight = (value / 255) * 52; 
+                const finalHeight = Math.max(4, percentHeight); // минимум 4px
+                bar.style.height = `${finalHeight}px`;
             });
-        }, 85);
+        }
+        draw();
     }
 
-    function resetVisualizer() {
-        if (visualizerInterval) clearInterval(visualizerInterval);
+    function resetVisualizerStyles() {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
         const bars = document.querySelectorAll('.bar');
         bars.forEach(bar => bar.style.height = '4px');
     }
 
     function playTrack() {
-        audio.play().then(() => { playBtn.innerText = '⏸'; startVisualizer(); })
-        .catch(() => { playBtn.innerText = '⏸'; startVisualizer(); });
+        // Запускаем аудио-движок при взаимодействии
+        initAudioContext();
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+
+        audio.play().then(() => { 
+            playBtn.innerText = '⏸'; 
+            renderVisualizer(); 
+        }).catch(() => { 
+            playBtn.innerText = '⏸'; 
+        });
     }
 
-    function pauseTrack() { audio.pause(); playBtn.innerText = '▶'; resetVisualizer(); }
+    function pauseTrack() { 
+        audio.pause(); 
+        playBtn.innerText = '▶'; 
+        resetVisualizerStyles(); 
+    }
 
     playBtn.addEventListener('click', () => { if (audio.paused) playTrack(); else pauseTrack(); });
     prevBtn.addEventListener('click', () => { let index = currentTrackIndex - 1; if (index < 0) index = tracks.length - 1; loadAndPlayTrack(index); });
     nextBtn.addEventListener('click', () => { let index = currentTrackIndex + 1; if (index >= tracks.length) index = 0; loadAndPlayTrack(index); });
     audio.addEventListener('ended', () => { nextBtn.click(); });
+    
     audio.addEventListener('timeupdate', () => {
         if (audio.duration) {
             progressBar.value = (audio.currentTime / audio.duration) * 100;
@@ -389,6 +436,7 @@
             timeCurrent.innerText = `${mins}:${secs < 10 ? '0' + secs : secs}`;
         }
     });
+    
     progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
     volumeSlider.addEventListener('input', (e) => { audio.volume = e.target.value; });
 
