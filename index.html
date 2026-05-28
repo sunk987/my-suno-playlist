@@ -17,7 +17,6 @@
             min-height: 100vh;
         }
 
-        /* Контейнер плеера */
         .player-container {
             width: 100%;
             max-width: 390px;
@@ -26,19 +25,47 @@
             padding: 20px;
             border: 1px solid #ff4171;
             text-align: center;
+            z-index: 10;
         }
 
-        /* Зона игры под плеером */
+        /* Счетчик сердечек */
+        #score-display { margin-top: 10px; font-weight: bold; color: #ff4171; }
+
+        /* Зона игры */
         #game-area {
             width: 100%;
             flex-grow: 1;
             position: relative;
             margin-top: 20px;
-            border: 1px dashed rgba(255, 65, 113, 0.3);
-            border-radius: 20px;
+            min-height: 300px;
+            overflow: hidden;
         }
 
         button { padding: 15px 30px; cursor: pointer; border-radius: 10px; border: none; background: #ff4171; color: white; font-weight: bold; }
+
+        .heart {
+            position: absolute;
+            font-size: 30px;
+            cursor: pointer;
+            animation: flyUp 8s linear forwards;
+        }
+
+        @keyframes flyUp {
+            from { bottom: -50px; opacity: 1; }
+            to { bottom: 100vh; opacity: 0; }
+        }
+
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            font-size: 20px;
+            animation: explode 0.5s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -46,6 +73,7 @@
 <div class="player-container">
     <h2 id="current-title">Иришке</h2>
     <button id="btn-play">▶ Play</button>
+    <div id="score-display">Поймано сердечек: <span id="score">0</span></div>
     <audio id="audio" src="track1.mp3"></audio>
 </div>
 
@@ -54,16 +82,51 @@
 <script>
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('btn-play');
-    
+    const scoreEl = document.getElementById('score');
+    const gameArea = document.getElementById('game-area');
+    let score = 0;
+    let heartInterval;
+
     playBtn.onclick = () => {
         if (audio.paused) {
             audio.play();
             playBtn.innerText = "⏸ Pause";
+            heartInterval = setInterval(spawnHeart, 1000);
         } else {
             audio.pause();
             playBtn.innerText = "▶ Play";
+            clearInterval(heartInterval);
         }
     };
+
+    function spawnHeart() {
+        const heart = document.createElement('div');
+        heart.innerHTML = '❤️';
+        heart.className = 'heart';
+        heart.style.left = Math.random() * 80 + 'vw';
+        
+        heart.onclick = (e) => {
+            createExplosion(e.clientX, e.clientY);
+            score++;
+            scoreEl.innerText = score;
+            heart.remove();
+        };
+        
+        gameArea.appendChild(heart);
+        setTimeout(() => heart.remove(), 8000);
+    }
+
+    function createExplosion(x, y) {
+        for(let i=0; i<3; i++) {
+            const s = document.createElement('div');
+            s.innerHTML = '✨';
+            s.className = 'sparkle';
+            s.style.left = x + 'px';
+            s.style.top = y + 'px';
+            document.body.appendChild(s);
+            setTimeout(() => s.remove(), 500);
+        }
+    }
 </script>
 </body>
 </html>
