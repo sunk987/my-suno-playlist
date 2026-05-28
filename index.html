@@ -5,166 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Плейлист: Иришке</title>
     <style>
-        body {
-            background-color: #0c0205;
-            color: #ffffff;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 10px;
-            display: flex;
-            flex-direction: column; 
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-            overflow-x: hidden;
-        }
+        body { background-color: #0c0205; color: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }
 
-        /* ЗАКРЕПЛЕННЫЙ СЧЁТЧИК */
-        .score-container {
-            position: fixed; 
-            top: 20px;       
-            left: 50%;
-            transform: translateX(-50%) scale(1); 
-            background: rgba(255, 42, 95, 0.2);
-            border: 1px solid rgba(255, 42, 95, 0.4);
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 42, 95, 0.3);
-            z-index: 9999; 
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            pointer-events: none;
-            backdrop-filter: blur(5px);
-            transition: transform 0.1s ease;
-        }
-        .score-container.bump { transform: translateX(-50%) scale(1.15); }
-        #score-count { color: #ff4171; font-size: 18px; font-weight: 800; }
+        /* СЧЕТЧИК */
+        .score-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(255, 42, 95, 0.2); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(255, 42, 95, 0.4); z-index: 9999; color: white; }
+        #score-count { color: #ff4171; font-weight: 800; font-size: 18px; }
 
-        /* КОНТЕЙНЕР ПЛЕЕРА */
-        .player-wrapper {
-            width: 100%;
-            max-width: 390px;
-            margin-top: 20px;
-            flex-shrink: 0;
-            z-index: 10;
-        }
-        .player-container {
-            position: relative;
-            width: 100%;
-            background-image: url('cover.jpg');
-            background-size: cover;
-            background-position: center;
-            border-radius: 25px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
-            border: 1px solid rgba(255, 42, 95, 0.2);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        .player-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(18, 3, 7, 0.4) 0%, rgba(18, 3, 7, 0.85) 100%); z-index: 1; }
-        .header, .controls-area { position: relative; z-index: 2; padding: 20px; }
-        .header { text-align: center; padding-bottom: 0; }
-        .visualizer-area { height: 60px; background: rgba(0, 0, 0, 0.5); border-radius: 14px; display: flex; align-items: flex-end; padding: 8px; margin: 15px 0; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .bar { flex-grow: 1; margin: 0 1px; height: 4px; border-radius: 2px 2px 0 0; }
-        .controls { display: flex; justify-content: center; align-items: center; gap: 25px; margin-bottom: 15px; }
-        .btn { background: none; border: none; color: #fff; cursor: pointer; font-size: 24px; }
-        .btn-play { background: linear-gradient(135deg, #ff4171, #d0003c); width: 54px; height: 54px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; }
-        .playlist { list-style: none; padding: 0; margin: 15px 0 0 0; max-height: 120px; overflow-y: auto; border-top: 1px solid rgba(255,255,255,0.1); }
-        .track-item { padding: 8px; cursor: pointer; font-size: 13px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-top: 5px; }
-        .track-item.active { border-left: 3px solid #ff2a5f; background: rgba(255, 42, 95, 0.2); }
+        /* ПЛЕЕР */
+        .player-wrapper { width: 100%; max-width: 390px; margin-top: 50px; flex-shrink: 0; z-index: 10; }
+        .player-container { position: relative; width: 100%; background-image: url('cover.jpg'); background-size: cover; background-position: center; border-radius: 25px; border: 1px solid rgba(255, 42, 95, 0.2); overflow: hidden; padding: 20px; text-align: center; }
+        .player-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1; }
+        .content { position: relative; z-index: 2; }
+        
+        .visualizer-area { height: 40px; display: flex; align-items: flex-end; justify-content: center; gap: 4px; margin: 15px 0; }
+        .bar { width: 6px; height: 10px; background: #ff4171; border-radius: 3px; }
+        .btn-play { background: #ff4171; border: none; color: white; width: 60px; height: 60px; border-radius: 50%; font-size: 24px; cursor: pointer; margin: 10px; }
+        
+        .playlist { list-style: none; padding: 0; text-align: left; }
+        .track-item { padding: 8px; background: rgba(255,255,255,0.05); margin-top: 5px; border-radius: 8px; cursor: pointer; font-size: 13px; }
 
-        /* ИГРОВАЯ ЗОНА */
-        #game-area { width: 100%; flex-grow: 1; position: relative; margin-top: 10px; }
-        .heart { position: absolute; bottom: -50px; font-size: 26px; cursor: pointer; z-index: 999; animation: flyUp linear forwards; padding: 15px; }
-        @keyframes flyUp { 100% { transform: translateY(-120vh); opacity: 0; } }
-        .sparkle { position: absolute; pointer-events: none; z-index: 1000; font-size: 14px; animation: explode 0.5s ease-out forwards; }
-        @keyframes explode { to { transform: scale(0.3); opacity: 0; } }
+        /* ИГРА */
+        #game-area { width: 100%; flex-grow: 1; position: relative; margin-top: 20px; }
+        .heart { position: absolute; font-size: 26px; cursor: pointer; animation: flyUp 8s linear forwards; padding: 15px; }
+        @keyframes flyUp { 100% { transform: translateY(-100vh); opacity: 0; } }
     </style>
 </head>
 <body>
 
-<div class="score-container" id="score-box">
-    <span>Поймано сердечек:</span>
-    <span id="score-count">0</span>
-</div>
+<div class="score-container">Сердечек: <span id="score-count">0</span></div>
 
 <div class="player-wrapper">
     <div class="player-container">
         <div class="player-overlay"></div>
-        <div class="header">
+        <div class="content">
             <h1>Иришке</h1>
-        </div>
-        <div class="controls-area">
-            <h3 id="current-title" style="text-align:center;">Загрузка...</h3>
+            <h3 id="current-title">Загрузка...</h3>
             <div class="visualizer-area" id="visualizer"></div>
-            <div class="controls">
-                <button class="btn" id="btn-prev">⏮</button>
-                <button class="btn btn-play" id="btn-play">▶</button>
-                <button class="btn" id="btn-next">⏭</button>
-            </div>
-            <audio id="audio-player" src=""></audio>
-            <ul class="playlist" id="playlist-container"></ul>
-        </div>
-    </div>
-</div>
-
-<div id="game-area"></div>
-
-<script>
-    const tracks = [
-        { title: "Заезженный диск", file: "track1.mp3" },
-        { title: "сумасшедший саксофон", file: "track2.mp3" },
-        { title: "Девчонка с картинки", file: "track3.mp3" }
-    ];
-
-    let score = 0;
-    const audio = document.getElementById('audio-player');
-    const playBtn = document.getElementById('btn-play');
-    const gameArea = document.getElementById('game-area');
-    const scoreCount = document.getElementById('score-count');
-
-    // Инициализация визуализатора
-    const viz = document.getElementById('visualizer');
-    for(let i=0; i<20; i++) {
-        const bar = document.createElement('div');
-        bar.className = 'bar';
-        bar.style.backgroundColor = '#ff4171';
-        viz.appendChild(bar);
-    }
-
-    playBtn.onclick = () => {
-        if (audio.paused) {
-            audio.play();
-            playBtn.innerText = '⏸';
-            startHearts();
-        } else {
-            audio.pause();
-            playBtn.innerText = '▶';
-            clearInterval(window.heartInterval);
-        }
-    };
-
-    function startHearts() {
-        window.heartInterval = setInterval(() => {
-            const heart = document.createElement('div');
-            heart.innerHTML = '❤️';
-            heart.className = 'heart';
-            heart.style.left = Math.random() * 90 + 'vw';
-            heart.style.animationDuration = (Math.random() * 5 + 5) + 's';
-            
-            heart.onclick = () => {
-                score++;
-                scoreCount.innerText = score;
-                heart.remove();
-            };
-            
-            gameArea.appendChild(heart);
-            setTimeout(() => heart.remove(), 10000);
-        }, 800);
-    }
-</script>
-</body>
-</html>
+            <button class="btn-play
