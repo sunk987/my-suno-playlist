@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Плейлист: Иришке</title>
+
+<title>Иришке • Playlist</title>
 
 <style>
+
 *{
     margin:0;
     padding:0;
@@ -13,7 +15,7 @@
 }
 
 body{
-    background:#0c0205;
+    background:#090104;
     font-family:'Segoe UI',sans-serif;
     color:white;
     min-height:100vh;
@@ -25,106 +27,139 @@ body{
 }
 
 /* Счетчик */
+
 .score-container{
     position:fixed;
-    top:15px;
+    top:20px;
     left:50%;
     transform:translateX(-50%);
     background:rgba(255,42,95,0.15);
     border:1px solid rgba(255,42,95,0.35);
-    padding:10px 18px;
-    border-radius:18px;
-    backdrop-filter:blur(6px);
+    border-radius:20px;
+    padding:10px 20px;
     font-weight:600;
-    z-index:9999;
+    backdrop-filter:blur(8px);
+    z-index:999;
 }
 
 #score-count{
     color:#ff4171;
-    font-size:18px;
+    font-size:22px;
     font-weight:800;
 }
 
 /* Плеер */
+
 .player-container{
     width:100%;
     max-width:390px;
-    border-radius:28px;
+    border-radius:30px;
     overflow:hidden;
     position:relative;
-    background:url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1200&auto=format&fit=crop') center/cover;
-    box-shadow:0 20px 60px rgba(0,0,0,0.9);
+
+    background:
+    linear-gradient(rgba(0,0,0,0.55),
+    rgba(0,0,0,0.65)),
+
+    url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1200&auto=format&fit=crop');
+
+    background-size:cover;
+    background-position:center;
+
+    box-shadow:0 20px 60px rgba(0,0,0,0.8);
+
     border:1px solid rgba(255,255,255,0.08);
 }
 
-.player-container::before{
-    content:'';
-    position:absolute;
-    inset:0;
-    background:rgba(0,0,0,0.55);
-    backdrop-filter:blur(2px);
-}
-
 .player-content{
-    position:relative;
-    z-index:2;
-    padding:20px;
+    padding:25px;
 }
 
 /* Верх */
+
 .header{
     display:flex;
     justify-content:space-between;
-    align-items:center;
-    margin-bottom:25px;
+    align-items:flex-start;
+    margin-bottom:20px;
 }
 
 .header h1{
-    font-size:36px;
+    font-size:58px;
     font-weight:800;
 }
 
 .header p{
-    opacity:0.75;
-    font-size:14px;
+    opacity:0.7;
+    font-size:15px;
 }
 
 /* Кнопка меню */
+
+.menu-box{
+    display:flex;
+    justify-content:flex-end;
+}
+
 #menu-toggle{
-    font-size:28px;
+    width:48px;
+    height:48px;
+    border:none;
+    border-radius:14px;
+
+    background:rgba(255,42,95,0.18);
+
     color:#ff4171;
+
+    font-size:28px;
+
     cursor:pointer;
+
     transition:0.25s;
-    user-select:none;
 }
 
 #menu-toggle:hover{
-    transform:scale(1.15);
+    transform:scale(1.08);
+    background:rgba(255,42,95,0.3);
 }
 
 /* Название */
+
 #current-title{
     text-align:center;
-    font-size:20px;
-    margin-bottom:18px;
+    font-size:22px;
+    margin:20px 0;
+    font-weight:700;
 }
 
 /* Визуализатор */
+
 .visualizer-area{
+    width:100%;
     height:60px;
+
     background:rgba(0,0,0,0.35);
+
     border-radius:14px;
+
     display:flex;
     align-items:flex-end;
-    padding:6px;
+
+    padding:5px;
     gap:3px;
-    margin-bottom:20px;
+
+    margin-bottom:25px;
 }
 
 .bar{
     flex:1;
-    background:linear-gradient(to top,#ff2a5f,#ff9a3d);
     border-radius:4px;
+
+    background:
+    linear-gradient(to top,
+    #ff2a5f,
+    #ff9a3d);
+
     animation:bars 1s infinite ease-in-out alternate;
 }
 
@@ -137,48 +172,69 @@ body{
 }
 
 @keyframes bars{
-    from{height:15%;}
-    to{height:100%;}
+
+    from{
+        height:15%;
+    }
+
+    to{
+        height:100%;
+    }
+
 }
 
 /* Кнопки */
+
 .controls{
     display:flex;
     justify-content:center;
     align-items:center;
     gap:25px;
+
     margin-bottom:20px;
 }
 
 .btn{
-    background:none;
     border:none;
+    background:none;
     color:white;
-    font-size:28px;
     cursor:pointer;
+    font-size:28px;
 }
 
 .btn-play{
-    width:72px;
-    height:72px;
+    width:75px;
+    height:75px;
+
     border-radius:50%;
-    background:linear-gradient(135deg,#ff2a5f,#ff5e7f);
-    box-shadow:0 0 20px rgba(255,42,95,0.5);
-    font-size:30px;
+
+    background:
+    linear-gradient(135deg,
+    #ff2a5f,
+    #ff5d8f);
+
+    box-shadow:
+    0 0 25px rgba(255,42,95,0.5);
+
+    font-size:32px;
 }
 
 /* Прогресс */
+
 .progress-container{
     display:flex;
     align-items:center;
     gap:10px;
-    margin-bottom:15px;
+
+    margin-bottom:20px;
 }
 
 .progress{
     flex:1;
     height:5px;
+
     background:rgba(255,255,255,0.2);
+
     border-radius:10px;
     overflow:hidden;
 }
@@ -186,28 +242,47 @@ body{
 .progress-filled{
     width:0%;
     height:100%;
+
     background:#ff4171;
 }
 
-/* Плейлист скрытый */
+/* Плейлист скрыт */
+
 .playlist-wrapper{
     display:none;
-    opacity:0;
-    transform:translateY(-10px);
-    transition:0.3s ease;
+
     margin-top:15px;
-    background:rgba(0,0,0,0.4);
-    border-radius:16px;
+
+    background:rgba(0,0,0,0.45);
+
+    border-radius:18px;
+
     overflow:hidden;
+
+    border:1px solid rgba(255,255,255,0.06);
 }
 
-.playlist-wrapper.active{
+/* Когда открыт */
+
+.playlist-wrapper.show{
     display:block;
-    opacity:1;
-    transform:translateY(0);
+    animation:fadeMenu 0.3s ease;
 }
 
-/* Список */
+@keyframes fadeMenu{
+
+    from{
+        opacity:0;
+        transform:translateY(-10px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+
 .playlist{
     list-style:none;
 }
@@ -216,37 +291,47 @@ body{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:14px 16px;
-    border-bottom:1px solid rgba(255,255,255,0.06);
+
+    padding:15px;
+
     cursor:pointer;
+
     transition:0.2s;
-    font-size:15px;
+
+    border-bottom:
+    1px solid rgba(255,255,255,0.05);
 }
 
 .track-item:hover{
-    background:rgba(255,255,255,0.06);
+    background:rgba(255,255,255,0.05);
 }
 
 .track-item.active{
-    background:rgba(255,42,95,0.25);
-    color:#ff8cab;
+    background:rgba(255,42,95,0.22);
 }
 
 /* Сердечки */
+
 .heart{
     position:absolute;
-    color:rgba(255,65,113,0.4);
+    color:rgba(255,65,113,0.45);
+
     font-size:24px;
+
     animation:flyUp linear forwards;
+
     pointer-events:none;
 }
 
 @keyframes flyUp{
+
     to{
         transform:translateY(-120vh);
         opacity:0;
     }
+
 }
+
 </style>
 </head>
 
@@ -259,129 +344,215 @@ body{
 
 <div class="player-container">
 
-    <div class="player-content">
+<div class="player-content">
 
-        <div class="header">
-            <div>
-                <h1>Иришке</h1>
-                <p>AleksLebed • Suno Playlist</p>
-            </div>
+    <!-- Верх -->
 
-            <div id="menu-toggle">☰</div>
+    <div class="header">
+
+        <div>
+            <h1>Иришке</h1>
+
+            <p>
+                AleksLebed • Suno Playlist
+            </p>
         </div>
 
-        <h2 id="current-title">Заезженный диск</h2>
+        <!-- ТРИ ПОЛОСКИ -->
 
-        <!-- Визуализатор -->
-        <div class="visualizer-area" id="visualizer"></div>
+        <div class="menu-box">
 
-        <!-- Кнопки -->
-        <div class="controls">
-            <button class="btn" id="btn-prev">⏮</button>
-
-            <button class="btn btn-play" id="btn-play">
-                ▶
+            <button id="menu-toggle">
+                ☰
             </button>
-
-            <button class="btn" id="btn-next">⏭</button>
-        </div>
-
-        <!-- Прогресс -->
-        <div class="progress-container">
-            <span id="current-time">0:00</span>
-
-            <div class="progress">
-                <div class="progress-filled" id="progress-filled"></div>
-            </div>
-
-            <span id="duration">0:00</span>
-        </div>
-
-        <!-- Аудио -->
-        <audio id="audio-player"></audio>
-
-        <!-- Скрытый плейлист -->
-        <div class="playlist-wrapper" id="playlist-wrapper">
-
-            <ul class="playlist" id="playlist-container"></ul>
 
         </div>
 
     </div>
+
+    <!-- Название -->
+
+    <h2 id="current-title">
+        Заезженный диск
+    </h2>
+
+    <!-- Визуализатор -->
+
+    <div class="visualizer-area" id="visualizer"></div>
+
+    <!-- Кнопки -->
+
+    <div class="controls">
+
+        <button class="btn" id="btn-prev">
+            ⏮
+        </button>
+
+        <button class="btn btn-play" id="btn-play">
+            ▶
+        </button>
+
+        <button class="btn" id="btn-next">
+            ⏭
+        </button>
+
+    </div>
+
+    <!-- Прогресс -->
+
+    <div class="progress-container">
+
+        <span id="current-time">
+            0:00
+        </span>
+
+        <div class="progress">
+
+            <div class="progress-filled"
+            id="progress-filled"></div>
+
+        </div>
+
+        <span id="duration">
+            4:01
+        </span>
+
+    </div>
+
+    <!-- Аудио -->
+
+    <audio id="audio-player"></audio>
+
+    <!-- СКРЫТЫЙ ПЛЕЙЛИСТ -->
+
+    <div class="playlist-wrapper"
+    id="playlist-wrapper">
+
+        <ul class="playlist"
+        id="playlist-container"></ul>
+
+    </div>
+
+</div>
 </div>
 
 <script>
 
+/* Треки */
+
 const tracks = [
-    {
-        title:"Заезженный диск",
-        file:"track1.mp3",
-        duration:"4:01"
-    },
 
-    {
-        title:"сумасшедший саксофон",
-        file:"track2.mp3",
-        duration:"4:39"
-    },
+{
+title:"Заезженный диск",
+file:"track1.mp3",
+duration:"4:01"
+},
 
-    {
-        title:"Девчонка с картинки",
-        file:"track3.mp3",
-        duration:"3:53"
-    },
+{
+title:"сумасшедший саксофон",
+file:"track2.mp3",
+duration:"4:39"
+},
 
-    {
-        title:"танцы на битом стекле",
-        file:"track4.mp3",
-        duration:"3:12"
-    }
+{
+title:"Девчонка с картинки",
+file:"track3.mp3",
+duration:"3:53"
+},
+
+{
+title:"танцы на битом стекле",
+file:"track4.mp3",
+duration:"3:12"
+}
+
 ];
+
+/* Элементы */
+
+const audio =
+document.getElementById('audio-player');
+
+const playBtn =
+document.getElementById('btn-play');
+
+const prevBtn =
+document.getElementById('btn-prev');
+
+const nextBtn =
+document.getElementById('btn-next');
+
+const currentTitle =
+document.getElementById('current-title');
+
+const playlistContainer =
+document.getElementById('playlist-container');
+
+const menuToggle =
+document.getElementById('menu-toggle');
+
+const playlistWrapper =
+document.getElementById('playlist-wrapper');
+
+const progressFilled =
+document.getElementById('progress-filled');
+
+const currentTime =
+document.getElementById('current-time');
+
+const duration =
+document.getElementById('duration');
+
+/* Текущий трек */
 
 let currentTrack = 0;
 
-const audio = document.getElementById('audio-player');
-const playBtn = document.getElementById('btn-play');
-const prevBtn = document.getElementById('btn-prev');
-const nextBtn = document.getElementById('btn-next');
-const currentTitle = document.getElementById('current-title');
-const playlistContainer = document.getElementById('playlist-container');
-const menuToggle = document.getElementById('menu-toggle');
-const playlistWrapper = document.getElementById('playlist-wrapper');
-const progressFilled = document.getElementById('progress-filled');
-const currentTime = document.getElementById('current-time');
-const duration = document.getElementById('duration');
-
 /* Визуализатор */
-const visualizer = document.getElementById('visualizer');
+
+const visualizer =
+document.getElementById('visualizer');
 
 for(let i=0;i<35;i++){
-    const bar = document.createElement('div');
+
+    const bar =
+    document.createElement('div');
+
     bar.classList.add('bar');
 
     bar.style.height =
-        Math.random()*100 + '%';
+    Math.random()*100+'%';
 
     visualizer.appendChild(bar);
+
 }
 
-/* Меню */
+/* КНОПКА ТРИ ПОЛОСКИ */
+
 menuToggle.addEventListener('click',()=>{
 
-    playlistWrapper.classList.toggle('active');
+    playlistWrapper.classList.toggle('show');
 
 });
 
-/* Создание списка */
+/* Создание плейлиста */
+
 tracks.forEach((track,index)=>{
 
-    const li = document.createElement('li');
+    const li =
+    document.createElement('li');
 
     li.classList.add('track-item');
 
-    li.innerHTML = `
-        <span>${index+1}. ${track.title}</span>
-        <span>${track.duration}</span>
+    li.innerHTML=`
+
+    <span>
+    ${index+1}. ${track.title}
+    </span>
+
+    <span>
+    ${track.duration}
+    </span>
+
     `;
 
     li.addEventListener('click',()=>{
@@ -399,38 +570,44 @@ tracks.forEach((track,index)=>{
 });
 
 /* Загрузка трека */
+
 function loadTrack(index){
 
-    currentTrack = index;
+    currentTrack=index;
 
-    audio.src = tracks[index].file;
+    audio.src=
+    tracks[index].file;
 
-    currentTitle.innerText =
-        tracks[index].title;
+    currentTitle.innerText=
+    tracks[index].title;
 
-    duration.innerText =
-        tracks[index].duration;
+    duration.innerText=
+    tracks[index].duration;
 
     updatePlaylist();
 
 }
 
+/* Активный трек */
+
 function updatePlaylist(){
 
-    document
-    .querySelectorAll('.track-item')
-    .forEach((item,index)=>{
+document
+.querySelectorAll('.track-item')
 
-        item.classList.toggle(
-            'active',
-            index===currentTrack
-        );
+.forEach((item,index)=>{
 
-    });
+item.classList.toggle(
+'active',
+index===currentTrack
+);
+
+});
 
 }
 
-/* Play pause */
+/* PLAY */
+
 playBtn.addEventListener('click',()=>{
 
     if(audio.paused){
@@ -449,7 +626,8 @@ playBtn.addEventListener('click',()=>{
 
 });
 
-/* Следующий */
+/* NEXT */
+
 nextBtn.addEventListener('click',()=>{
 
     currentTrack++;
@@ -468,7 +646,8 @@ nextBtn.addEventListener('click',()=>{
 
 });
 
-/* Предыдущий */
+/* PREV */
+
 prevBtn.addEventListener('click',()=>{
 
     currentTrack--;
@@ -489,35 +668,39 @@ prevBtn.addEventListener('click',()=>{
 });
 
 /* Прогресс */
+
 audio.addEventListener('timeupdate',()=>{
 
-    if(audio.duration){
+if(audio.duration){
 
-        const progress =
-            (audio.currentTime /
-             audio.duration)*100;
+const progress=
+(audio.currentTime/
+audio.duration)*100;
 
-        progressFilled.style.width =
-            progress + '%';
+progressFilled.style.width=
+progress+'%';
 
-        let minutes =
-            Math.floor(audio.currentTime/60);
+let minutes=
+Math.floor(audio.currentTime/60);
 
-        let seconds =
-            Math.floor(audio.currentTime%60);
+let seconds=
+Math.floor(audio.currentTime%60);
 
-        if(seconds<10){
-            seconds='0'+seconds;
-        }
+if(seconds<10){
 
-        currentTime.innerText =
-            `${minutes}:${seconds}`;
+seconds='0'+seconds;
 
-    }
+}
+
+currentTime.innerText=
+`${minutes}:${seconds}`;
+
+}
 
 });
 
-/* Авто следующий */
+/* Автоследующий */
+
 audio.addEventListener('ended',()=>{
 
     nextBtn.click();
@@ -525,6 +708,7 @@ audio.addEventListener('ended',()=>{
 });
 
 /* Старт */
+
 loadTrack(0);
 
 </script>
