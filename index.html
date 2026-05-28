@@ -2,14 +2,43 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Плейлист для Иришки</title>
+    <title>Иришке</title>
     <style>
-        body { background: #0c0205; color: white; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        /* Главная настройка: колонка, а не центр */
+        body { 
+            background: #0c0205; 
+            color: white; 
+            font-family: sans-serif; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; /* ВАЖНО: элементы друг под другом */
+            align-items: center; 
+            min-height: 100vh; 
+        }
         
-        .player-container { width: 90%; max-width: 390px; background: #1a050b; border: 1px solid #ff4171; border-radius: 20px; padding: 20px; margin-top: 20px; text-align: center; }
-        .btn-play { background: #ff4171; border: none; padding: 15px 30px; border-radius: 30px; color: white; font-size: 18px; cursor: pointer; }
+        /* Плеер занимает мало места */
+        .player-container { 
+            width: 90%; 
+            max-width: 390px; 
+            background: #1a050b; 
+            border: 1px solid #ff4171; 
+            border-radius: 20px; 
+            padding: 15px; 
+            margin-top: 10px; 
+            text-align: center; 
+            flex-shrink: 0; /* Не дает плееру сжиматься */
+        }
         
-        #game-area { width: 100%; flex-grow: 1; position: relative; overflow: hidden; }
+        .btn-play { background: #ff4171; border: none; padding: 10px 20px; border-radius: 20px; color: white; cursor: pointer; }
+        
+        /* Игровая зона занимает всё остальное место */
+        #game-area { 
+            width: 100%; 
+            flex-grow: 1; /* Растягивается на остаток экрана */
+            position: relative; 
+            overflow: hidden; 
+        }
+        
         .heart { position: absolute; font-size: 30px; cursor: pointer; animation: flyUp 6s linear forwards; }
         @keyframes flyUp { from { bottom: 0; opacity: 1; } to { bottom: 100%; opacity: 0; } }
     </style>
@@ -17,9 +46,9 @@
 <body>
 
 <div class="player-container">
-    <h1>Иришке</h1>
+    <h3 style="margin:0;">Иришке</h3>
     <button class="btn-play" id="btn-play">▶ Play</button>
-    <div style="margin-top:10px;">Поймано сердечек: <span id="score">0</span></div>
+    <div style="margin-top:5px;">Сердечек: <span id="score">0</span></div>
     <audio id="audio" src="track1.mp3"></audio>
 </div>
 
@@ -35,8 +64,9 @@
 
     playBtn.onclick = () => {
         if (audio.paused) {
-            audio.play().catch(e => alert("Нажми на экран для запуска!"));
+            audio.play().catch(e => alert("Нажми Play!"));
             playBtn.innerText = "⏸ Pause";
+            // Запускаем сердечки
             gameInterval = setInterval(spawnHeart, 800);
         } else {
             audio.pause();
