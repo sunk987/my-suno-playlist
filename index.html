@@ -31,25 +31,24 @@
             flex-direction: column;
         }
 
-        /* ЗОНА С РОЗОЙ: Оптимизирована под вертикальный скриншот */
+        /* ЗОНА С РОЗОЙ: Настроена под cover.jpg */
         .cover-area {
             position: relative;
             width: 100%;
-            height: 380px; /* Увеличили высоту окошка для розы */
-            background-image: url('cover.jpg');
+            height: 310px; /* Размер держит баланс, чтобы текст не наезжал */
+            background-image: url('cover.jpg'); /* Вернули название cover.jpg */
             background-size: cover;
-            /* ВАЖНО: Вырезаем строго центр картинки, где находится роза */
-            background-position: center center; 
+            background-position: center; 
             background-repeat: no-repeat;
             background-color: #120307;
         }
 
-        /* Мягкое размытие и темное затемнение внизу фотографии */
+        /* Мягкое затемнение внизу фотографии */
         .cover-area::after {
             content: '';
             position: absolute;
             left: 0; bottom: 0; right: 0;
-            height: 80px;
+            height: 60px;
             background: linear-gradient(to top, #120307, transparent);
         }
 
@@ -79,7 +78,7 @@
 
         /* ЗОНА УПРАВЛЕНИЯ СНИЗУ */
         .controls-area {
-            padding: 15px 20px 20px 20px;
+            padding: 10px 20px 20px 20px;
             display: flex;
             flex-direction: column;
             background: #120307;
@@ -87,7 +86,7 @@
 
         .current-track-info {
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         #current-title {
@@ -98,7 +97,7 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* ГОРИЗОНТАЛЬНЫЙ РАЗНОЦВЕТНЫЙ ЭКВАЛАЙЗЕР */
+        /* ГОРИЗОНТАЛЬНЫЙ ЭКВАЛАЙЗЕР */
         .visualizer-area {
             width: 100%;
             height: 60px;
@@ -121,7 +120,7 @@
             transition: height 0.1s ease;
         }
 
-        /* Кнопки управления музыкальным плеером */
+        /* Кнопки управления */
         .controls {
             display: flex;
             justify-content: center;
@@ -219,7 +218,7 @@
             background: #ff2a5f;
         }
 
-        /* Список воспроизведения */
+        /* Список треков */
         .playlist {
             list-style: none;
             padding: 0;
@@ -332,12 +331,9 @@
         for (let i = 0; i < numBars; i++) {
             const bar = document.createElement('div');
             bar.classList.add('bar');
-            
-            // Рассчитываем радужный спектр для полос эквалайзера
             const hue = 330 + (i * (70 / numBars)); 
             bar.style.backgroundColor = `hsl(${hue}, 95%, 55%)`;
             bar.style.boxShadow = `0 0 4px hsl(${hue}, 95%, 50%)`;
-            
             visualizer.appendChild(bar);
         }
     }
