@@ -36,7 +36,7 @@
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
-            z-index: 10; /* Плеер всегда выше сердечек, чтобы кнопки нажимались идеально */
+            z-index: 10; /* Плеер на своем месте */
         }
 
         /* Слой затемнения фона */
@@ -252,26 +252,27 @@
         /* СТИЛИ ДЛЯ ЛЕТАЮЩИХ СЕРДЕЧЕК */
         .heart {
             position: absolute;
-            bottom: -40px;
-            color: rgba(255, 65, 113, 0.7);
-            font-size: 24px;
+            bottom: -50px;
+            /* Сделали их полупрозрачными (0.3), чтобы они не мешали читать текст, летая спереди */
+            color: rgba(255, 65, 113, 0.35); 
+            font-size: 26px;
             user-select: none;
-            /* Разрешаем нажатия на элементы под плеером и вокруг него */
             pointer-events: auto; 
             cursor: pointer;
-            z-index: 5; /* Находятся на свободном фоне и по бокам от плеера */
+            z-index: 999; /* КРИТИЧЕСКИ ВАЖНО: теперь они строго ПОВЕРХ плеера, их точно можно нажать! */
             animation: flyUp linear forwards;
             will-change: transform, opacity;
-            transition: opacity 0.1s ease-out;
-            padding: 10px; /* Увеличиваем хитбокс, чтобы на телефоне было легче попасть пальцем */
+            padding: 15px; /* Большая зона для уверенного тапа пальцем */
+            touch-action: manipulation;
         }
 
         /* Эффект лопнувшего сердечка */
         .heart.popped {
             animation: none !important;
-            transform: scale(1.6) !important;
+            transform: scale(1.8) !important;
             opacity: 0 !important;
-            transition: all 0.15s ease-out;
+            color: rgba(255, 255, 255, 0.8) !important;
+            transition: all 0.12s ease-out;
         }
 
         @keyframes flyUp {
@@ -286,7 +287,8 @@
                 opacity: 1;
             }
             100% {
-                transform: translateY(-110vh) translateX(var(--random-x)) rotate(var(--random-rot));
+                /* Увеличили высоту полета, чтобы улетали гарантированно далеко на любых смартфонах */
+                transform: translateY(-120vh) translateX(var(--random-x)) rotate(var(--random-rot));
                 opacity: 0;
             }
         }
@@ -451,40 +453,41 @@
         bars.forEach(bar => bar.style.height = '4px');
     }
 
-    // ИНТЕРАКТИВНЫЕ СЕРДЕЧКИ С ЛОПАНИЕМ
+    // НАСТРОЕННЫЕ СЕРДЕЧКИ
     function createHeart() {
         const heart = document.createElement('div');
         heart.classList.add('heart');
         heart.innerHTML = '❤️';
         
-        // Позиция по ширине экрана
-        heart.style.left = Math.random() * 90 + 'vw';
+        // Распределяем по всей ширине
+        heart.style.left = Math.random() * 85 + 'vw';
         
-        const size = Math.random() * 16 + 16; // От 16px до 32px
+        const size = Math.random() * 12 + 18; // Комфортный размер
         heart.style.fontSize = size + 'px';
         
-        const duration = Math.random() * 4 + 4; // Скорость полета
+        // ЗАМЕДЛИЛИ ПОЛЕТ: теперь летят плавно от 8 до 15 секунд
+        const duration = Math.random() * 7 + 8; 
         heart.style.animationDuration = duration + 's';
         
-        const randomX = (Math.random() * 140 - 70) + 'px';
-        const randomRot = (Math.random() * 100 - 50) + 'deg';
+        const randomX = (Math.random() * 100 - 50) + 'px';
+        const randomRot = (Math.random() * 80 - 40) + 'deg';
         heart.style.setProperty('--random-x', randomX);
         heart.style.setProperty('--random-rot', randomRot);
 
-        // Функция лопания сердечка
         function popHeart(e) {
-            e.preventDefault(); // Защита от двойного клика на мобилках
+            e.preventDefault();
+            e.stopPropagation(); // Не даем нажатию «пробивать» сквозь сердечко элементы плеера
             if (heart.classList.contains('popped')) return;
 
             heart.classList.add('popped');
-            heart.innerHTML = '✨'; // Эффект вспышки при взрыве
+            heart.innerHTML = '✨'; 
             
             setTimeout(() => {
                 heart.remove();
-            }, 150);
+            }, 120);
         }
 
-        // Ловим нажатие и для ПК (click) и для сенсорных экранов (touchstart)
+        // Жесткая привязка к мобильному тачу
         heart.addEventListener('touchstart', popHeart, { passive: false });
         heart.addEventListener('mousedown', popHeart);
         
@@ -497,7 +500,8 @@
 
     function startHearts() {
         if (heartInterval) clearInterval(heartInterval);
-        heartInterval = setInterval(createHeart, 350); // Чуть увеличили частоту для веселья
+        // Появляются раз в полсекунды (500мс), чтобы не устраивать кашу на переднем плане
+        heartInterval = setInterval(createHeart, 500); 
     }
 
     function stopHearts() {
