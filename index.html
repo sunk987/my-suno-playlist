@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Плейлист: Иришке</title>
+    <title>Для Иришки</title>
     <style>
         body {
             background-color: #0c0205;
@@ -11,67 +11,71 @@
             font-family: 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             display: flex;
-            flex-direction: column; /* Плеер и игра строго друг под другом */
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden; /* Чтобы сердечки не создавали полосу прокрутки */
+            overflow: hidden;
         }
 
-        /* Плеер: фиксированный размер сверху */
+        /* ПЛЕЕР: Возвращаем нормальный размер */
         .player-container {
-            width: 100%;
-            max-width: 390px;
-            background-image: url('cover.jpg');
-            background-size: cover;
-            border-bottom-left-radius: 25px;
-            border-bottom-right-radius: 25px;
-            border: 1px solid rgba(255, 42, 95, 0.2);
-            overflow: hidden;
-            z-index: 100; /* Плеер всегда поверх сердечек */
+            width: 90%;
+            max-width: 400px;
+            background: #1a050b;
+            border: 1px solid #ff4171;
+            border-radius: 25px;
+            padding: 25px;
+            margin-top: 20px;
+            text-align: center;
+            z-index: 100; /* Плеер всегда сверху */
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
 
-        .controls-area { padding: 20px; background: rgba(0,0,0,0.7); }
-        .btn-play { background: #ff4171; border: none; color: white; width: 50px; height: 50px; border-radius: 50%; font-size: 20px; cursor: pointer; }
-        
-        /* СЧЕТЧИК */
-        .score-container { margin: 15px 0; color: #ff4171; font-weight: bold; }
+        .btn-play { 
+            background: #ff4171; 
+            border: none; 
+            color: white; 
+            padding: 15px 40px; 
+            border-radius: 30px; 
+            font-size: 20px; 
+            cursor: pointer; 
+            margin-top: 10px;
+        }
 
-        /* ИГРА: занимает всё оставшееся место внизу */
+        /* ИГРА: Сердечки теперь крупные */
         #game-area {
             width: 100%;
-            flex-grow: 1; /* Растягивается на всё доступное пространство */
+            flex-grow: 1;
             position: relative;
-            z-index: 1; /* Сердечки под плеером */
+            z-index: 1;
         }
 
         .heart {
             position: absolute;
-            font-size: 20px;
+            font-size: 45px; /* СДЕЛАЛ КРУПНЕЕ (было 20) */
             color: #ff4171;
             cursor: pointer;
             animation: flyUp linear forwards;
             padding: 10px;
+            transition: transform 0.1s;
         }
 
+        .heart:active { transform: scale(1.3); }
+
         @keyframes flyUp {
-            to { transform: translateY(-100vh); opacity: 0; }
+            to { transform: translateY(-110vh); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
 <div class="player-container">
-    <div class="controls-area">
-        <h1 style="text-align:center; margin:0 0 10px 0;">Иришке</h1>
-        <div style="text-align:center;">
-            <button class="btn-play" id="btn-play">▶</button>
-        </div>
-        <div class="score-container" style="text-align:center;">
-            Поймано сердечек: <span id="score-count">0</span>
-        </div>
-        <audio id="audio-player" src="track1.mp3"></audio>
+    <h1>Иришке</h1>
+    <button class="btn-play" id="btn-play">▶ Play</button>
+    <div style="margin-top:15px; font-size: 18px;">
+        Поймано сердечек: <span id="score-count" style="font-weight:bold; color:#ff4171;">0</span>
     </div>
+    <audio id="audio-player" src="track1.mp3"></audio>
 </div>
 
 <div id="game-area"></div>
@@ -87,11 +91,11 @@
     playBtn.onclick = () => {
         if (audio.paused) {
             audio.play();
-            playBtn.innerText = '⏸';
-            heartInterval = setInterval(createHeart, 800);
+            playBtn.innerText = '⏸ Pause';
+            heartInterval = setInterval(createHeart, 1000); // Чуть реже, чтобы не перегружать экран
         } else {
             audio.pause();
-            playBtn.innerText = '▶';
+            playBtn.innerText = '▶ Play';
             clearInterval(heartInterval);
         }
     };
@@ -100,12 +104,15 @@
         const heart = document.createElement('div');
         heart.innerHTML = '❤️';
         heart.className = 'heart';
-        // Появление в случайном месте по горизонтали
-        heart.style.left = (Math.random() * 90 + 5) + 'vw';
-        // Случайный размер (15-25px)
-        heart.style.fontSize = (Math.random() * 10 + 15) + 'px';
-        // Случайная скорость
-        heart.style.animationDuration = (Math.random() * 5 + 7) + 's';
+        
+        // Появление в случайном месте (отступ 10% от краев)
+        heart.style.left = (Math.random() * 80 + 10) + 'vw';
+        
+        // Размер: от 40px до 50px (реально крупные!)
+        heart.style.fontSize = (Math.random() * 10 + 40) + 'px';
+        
+        // Скорость: летят плавно
+        heart.style.animationDuration = (Math.random() * 4 + 6) + 's';
 
         heart.onclick = () => {
             score++;
