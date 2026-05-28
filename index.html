@@ -1,6 +1,55 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+  /* Сердечки */
+
+.heart{
+
+    position:fixed;
+
+    color:rgba(255,65,113,0.45);
+
+    z-index:9999;
+
+    user-select:none;
+
+    cursor:pointer;
+
+    animation:flyUp linear forwards;
+
+    transition:0.2s;
+}
+
+/* Полет вверх */
+
+@keyframes flyUp{
+
+    to{
+
+        transform:
+        translateY(-120vh);
+
+        opacity:0;
+
+    }
+
+}
+
+/* Анимация счетчика */
+
+.score-container.bump{
+
+    transform:
+    translateX(-50%)
+    scale(1.15);
+
+    border-color:
+    rgba(255,42,95,0.9);
+
+    box-shadow:
+    0 0 25px rgba(255,42,95,0.45);
+
+}  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
