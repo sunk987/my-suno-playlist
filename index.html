@@ -15,21 +15,9 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* Верхняя панель со счетом */
-        .score-top {
-            margin-bottom: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #ff4171;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px 20px;
-            border-radius: 20px;
-        }
-
-        /* Плеер (фиксирован сверху) */
+        /* Контейнер плеера */
         .player-container {
             width: 100%;
             max-width: 390px;
@@ -37,51 +25,23 @@
             border-radius: 25px;
             padding: 20px;
             border: 1px solid #ff4171;
-            z-index: 10; /* Плеер выше игры */
-            position: relative;
+            text-align: center;
         }
 
-        /* Зона игры - под плеером */
+        /* Зона игры под плеером */
         #game-area {
-            flex-grow: 1;
             width: 100%;
+            flex-grow: 1;
             position: relative;
             margin-top: 20px;
-            min-height: 300px;
+            border: 1px dashed rgba(255, 65, 113, 0.3);
+            border-radius: 20px;
         }
 
-        .btn { cursor: pointer; padding: 10px 20px; }
-
-        /* Сердечки летят только в зоне игры */
-        .heart {
-            position: absolute;
-            font-size: 30px;
-            cursor: pointer;
-            animation: flyUp 10s linear forwards;
-            z-index: 5;
-        }
-
-        @keyframes flyUp {
-            from { bottom: 0; }
-            to { bottom: 100vh; }
-        }
-
-        .sparkle {
-            position: absolute;
-            pointer-events: none;
-            font-size: 15px;
-            animation: explode 0.5s ease-out forwards;
-            z-index: 20;
-        }
-
-        @keyframes explode {
-            to { transform: scale(2); opacity: 0; }
-        }
+        button { padding: 15px 30px; cursor: pointer; border-radius: 10px; border: none; background: #ff4171; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
-
-<div class="score-top">Поймано сердечек: <span id="score">0</span></div>
 
 <div class="player-container">
     <h2 id="current-title">Иришке</h2>
@@ -94,54 +54,16 @@
 <script>
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('btn-play');
-    const scoreEl = document.getElementById('score');
-    const gameArea = document.getElementById('game-area');
-    let score = 0;
-
+    
     playBtn.onclick = () => {
         if (audio.paused) {
             audio.play();
             playBtn.innerText = "⏸ Pause";
-            startHeartSpawner();
         } else {
             audio.pause();
             playBtn.innerText = "▶ Play";
-            clearInterval(window.heartInterval);
         }
     };
-
-    function spawnHeart() {
-        const heart = document.createElement('div');
-        heart.innerHTML = '❤️';
-        heart.className = 'heart';
-        heart.style.left = Math.random() * 90 + 'vw';
-        
-        heart.onclick = (e) => {
-            createExplosion(e.clientX, e.clientY);
-            score++;
-            scoreEl.innerText = score;
-            heart.remove();
-        };
-        
-        gameArea.appendChild(heart);
-        setTimeout(() => heart.remove(), 10000);
-    }
-
-    function startHeartSpawner() {
-        window.heartInterval = setInterval(spawnHeart, 1000);
-    }
-
-    function createExplosion(x, y) {
-        for(let i=0; i<5; i++) {
-            const s = document.createElement('div');
-            s.innerHTML = '✨';
-            s.className = 'sparkle';
-            s.style.left = x + 'px';
-            s.style.top = y + 'px';
-            document.body.appendChild(s);
-            setTimeout(() => s.remove(), 500);
-        }
-    }
 </script>
 </body>
 </html>
