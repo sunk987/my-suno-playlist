@@ -3,632 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Плейлист: Иришке</title>
+    <title>Плейлист</title>
     <style>
         body {
             background-color: #0c0205;
-            color: #ffffff;
-            font-family: 'Segoe UI', Roboto, sans-serif;
             margin: 0;
-            padding: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            box-sizing: border-box;
-            overflow: hidden;
-            position: relative;
+            color: white;
+            font-family: sans-serif;
         }
 
-        /* ЗАКРЕПЛЕННЫЙ СЧЁТЧИК */
-        .score-container {
-            position: fixed; 
-            top: 20px;       
-            left: 50%;
-            transform: translateX(-50%) scale(1); 
-            background: rgba(255, 42, 95, 0.2);
-            border: 1px solid rgba(255, 42, 95, 0.4);
-            padding: 8px 18px;
+        /* Упрощенный счетчик */
+        #score-container {
+            position: absolute;
+            top: 20px;
+            z-index: 100;
+            background: rgba(255, 42, 95, 0.3);
+            padding: 10px 20px;
             border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 42, 95, 0.3);
-            z-index: 9999; 
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            user-select: none;
-            transition: transform 0.1s ease, border-color 0.1s ease;
-            backdrop-filter: blur(5px);
-            pointer-events: none; /* Чтобы не мешал нажимать кнопки */
-        }
-
-        .score-container.bump {
-            transform: translateX(-50%) scale(1.15); 
-            border-color: rgba(255, 42, 95, 0.9);
-            background: rgba(255, 42, 95, 0.35);
-        }
-
-        #score-count {
-            color: #ff4171;
-            font-size: 18px;
-            font-weight: 800;
-            text-shadow: 0 0 8px rgba(255, 65, 113, 0.8);
-        }
-
-        /* Контейнер плеера */
-        .player-container {
-            position: relative;
-            width: 100%;
-            max-width: 390px;
-            background-image: url('cover.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            border-radius: 25px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
-            border: 1px solid rgba(255, 42, 95, 0.2);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            z-index: 10;
-            margin-top: 40px; 
-        }
-
-        .player-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(180deg, rgba(18, 3, 7, 0.4) 0%, rgba(18, 3, 7, 0.85) 100%);
-            z-index: 1;
-        }
-
-        .header {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-            padding: 25px 20px 10px 20px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
-        }
-
-        .header h1 {
-            font-size: 28px;
-            margin: 0 0 3px 0;
-            color: #fff;
-            font-weight: 800;
-        }
-
-        .header p {
-            color: #dddddd;
-            margin: 0;
-            font-size: 12px;
-            letter-spacing: 1px;
-        }
-
-        .controls-area {
-            position: relative;
-            z-index: 2;
-            padding: 10px 20px 20px 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .current-track-info {
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        #current-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 0;
-            color: #fff;
-            text-shadow: 0 2px 6px rgba(0,0,0,0.8);
-        }
-
-        .visualizer-area {
-            width: 100%;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 14px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            padding: 8px;
-            box-sizing: border-box;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .bar {
-            flex-grow: 1;
-            margin: 0 1px;
-            height: 4px;
-            border-radius: 2px 2px 0 0;
-            will-change: height;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 25px;
-            margin-bottom: 15px;
-        }
-
-        .btn {
-            background: none;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-            font-size: 24px;
-            transition: transform 0.1s;
-        }
-
-        .btn-play {
-            background: linear-gradient(135deg, #ff4171, #d0003c);
-            width: 54px;
-            height: 54px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 22px;
-            box-shadow: 0 0 15px rgba(255, 42, 95, 0.5);
-        }
-
-        .progress-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 11px;
-            color: #eeeeee;
-            margin-bottom: 15px;
-        }
-
-        .progress-bar-wrapper {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-        }
-
-        .progress-bar {
-            width: 100%;
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255, 255, 255, 0.25);
-            height: 4px;
-            border-radius: 2px;
-            outline: none;
-        }
-
-        .progress-bar::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #fff;
-            box-shadow: 0 0 5px #ff2a5f;
-        }
-
-        .volume-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 6px 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.02);
-        }
-
-        .volume-slider {
-            flex-grow: 1;
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255, 255, 255, 0.2);
-            height: 3px;
-        }
-
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ff2a5f;
-        }
-
-        .playlist {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            max-height: 140px;
-            overflow-y: auto;
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-            padding-top: 8px;
-        }
-
-        .track-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 4px;
-            background-color: rgba(0, 0, 0, 0.3);
-            font-size: 13px;
-        }
-
-        .track-item.active {
-            background: linear-gradient(90deg, rgba(255, 42, 95, 0.35), transparent);
-            border-left: 3px solid #ff2a5f;
-        }
-
-        .track-details h4 {
-            margin: 0;
-            font-size: 13px;
-            font-weight: 500;
-            color: #fff;
-        }
-
-        .track-duration {
-            font-size: 11px;
-            color: #cccccc;
-        }
-
-        .heart {
-            position: absolute;
-            bottom: -50px;
-            color: rgba(255, 65, 113, 0.35); 
-            font-size: 26px;
-            user-select: none;
-            pointer-events: auto; 
-            cursor: pointer;
-            z-index: 999; 
-            animation: flyUp linear forwards;
-            will-change: transform, opacity;
-            padding: 15px; 
-            touch-action: manipulation;
-        }
-
-        @keyframes flyUp {
-            0% {
-                transform: translateY(0) translateX(0) rotate(0deg);
-                opacity: 0;
-            }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% {
-                transform: translateY(-120vh) translateX(var(--random-x)) rotate(var(--random-rot));
-                opacity: 0;
-            }
-        }
-
-        .sparkle {
-            position: absolute;
             pointer-events: none;
-            z-index: 1000; 
-            font-size: 14px;
-            user-select: none;
-            will-change: transform, opacity;
-            animation: explode 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
         }
 
-        @keyframes explode {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--ex), var(--ey)) scale(0.3) rotate(var(--erot)); opacity: 0; }
+        .player {
+            width: 90%;
+            max-width: 350px;
+            background: #1a050b;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid #ff4171;
         }
+
+        button { padding: 15px; margin: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="score-container" id="score-box">
-    <span>Поймано сердечек:</span>
-    <span id="score-count">0</span>
-</div>
+<div id="score-container">Сердечек: <span id="score">0</span></div>
 
-<div class="player-container">
-    <div class="player-overlay"></div>
-
-    <div class="header">
-        <h1>Иришке</h1>
-        <p>AleksLebed • Suno Playlist</p>
-    </div>
-
-    <div class="controls-area">
-        <div class="current-track-info">
-            <h3 id="current-title">Загрузка...</h3>
-        </div>
-
-        <div class="visualizer-area" id="visualizer"></div>
-
-        <div class="controls">
-            <button class="btn" id="btn-prev">⏮</button>
-            <button class="btn btn-play" id="btn-play">▶</button>
-            <button class="btn" id="btn-next">⏭</button>
-        </div>
-
-        <audio id="audio-player" crossorigin="anonymous" src=""></audio>
-
-        <div class="progress-container">
-            <span id="time-current">0:00</span>
-            <div class="progress-bar-wrapper">
-                <input type="range" class="progress-bar" id="progress" min="0" max="100" value="0">
-            </div>
-            <span id="time-duration">0:00</span>
-        </div>
-
-        <div class="volume-container">
-            <span>🔈</span>
-            <input type="range" class="volume-slider" id="volume" min="0" max="1" step="0.05" value="0.7">
-            <span>🔊</span>
-        </div>
-
-        <ul class="playlist" id="playlist-container"></ul>
-    </div>
+<div class="player">
+    <h2 id="title">Трек 1</h2>
+    <button id="playBtn">▶ Play</button>
+    <audio id="audio" src="track1.mp3"></audio>
 </div>
 
 <script>
-    const tracks = [
-        { id: 1, title: "Заезженный диск", duration: "4:01", file: "track1.mp3" },
-        { id: 2, title: "сумасшедший саксофон", duration: "4:39", file: "track2.mp3" },
-        { id: 3, title: "Девчонка с картинки", duration: "3:53", file: "track3.mp3" },
-        { id: 4, title: "танцы на битом стекле", duration: "3:12", file: "track4.mp3" }
-    ];
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const scoreEl = document.getElementById('score');
+    let score = 0;
 
-    let currentTrackIndex = 0;
-    const numBars = 28;
-    let score = 0; 
-    
-    const audio = document.getElementById('audio-player');
-    const playBtn = document.getElementById('btn-play');
-    const prevBtn = document.getElementById('btn-prev');
-    const nextBtn = document.getElementById('btn-next');
-    const volumeSlider = document.getElementById('volume');
-    const progressBar = document.getElementById('progress');
-    const playlistContainer = document.getElementById('playlist-container');
-    const visualizer = document.getElementById('visualizer');
-    const currentTitle = document.getElementById('current-title');
-    const timeCurrent = document.getElementById('time-current');
-    const timeDuration = document.getElementById('time-duration');
-    const scoreCount = document.getElementById('score-count');
-    const scoreBox = document.getElementById('score-box');
-
-    // ТОЧНОЕ ОБЪЯВЛЕНИЕ ПЕРЕМЕННЫХ
-    let audioContext = null;
-    let analyser = null;
-    let gainNode = null; 
-    let source = null;
-    let animationFrameId = null;
-    let heartInterval = null; 
-
-    function createVisualizer() {
-        visualizer.innerHTML = '';
-        for (let i = 0; i < numBars; i++) {
-            const bar = document.createElement('div');
-            bar.classList.add('bar');
-            const hue = 330 + (i * (70 / numBars)); 
-            bar.style.backgroundColor = `hsl(${hue}, 95%, 55%)`;
-            bar.style.boxShadow = `0 0 4px hsl(${hue}, 95%, 50%)`;
-            bar.style.height = '4px';
-            visualizer.appendChild(bar);
-        }
-    }
-
-    function initAudioContext() {
-        if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            analyser.fftSize = 64; 
-            
-            gainNode = audioContext.createGain();
-            gainNode.gain.value = volumeSlider.value; 
-            
-            source = audioContext.createMediaElementSource(audio);
-            
-            source.connect(analyser);
-            source.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-        }
-    }
-
-    function initPlaylist() {
-        playlistContainer.innerHTML = '';
-        tracks.forEach((track, index) => {
-            const li = document.createElement('li');
-            li.classList.add('track-item');
-            if(index === currentTrackIndex) li.classList.add('active');
-            li.innerHTML = `<div class="track-details"><h4>${index + 1}. ${track.title}</h4></div><div class="track-duration">${track.duration}</div>`;
-            li.addEventListener('click', () => loadAndPlayTrack(index));
-            playlistContainer.appendChild(li);
-        });
-        loadTrack(currentTrackIndex);
-    }
-
-    function loadTrack(index) {
-        currentTrackIndex = index;
-        audio.src = tracks[index].file;
-        currentTitle.innerText = tracks[index].title;
-        timeDuration.innerText = tracks[index].duration;
-        timeCurrent.innerText = "0:00";
-        progressBar.value = 0;
-        document.querySelectorAll('.track-item').forEach((item, i) => {
-            item.classList.toggle('active', i === index);
-        });
-        resetVisualizerStyles();
-    }
-
-    function loadAndPlayTrack(index) { 
-        loadTrack(index); 
-        playTrack(); 
-    }
-
-    function renderVisualizer() {
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-        const bars = document.querySelectorAll('.bar');
-
-        function draw() {
-            animationFrameId = requestAnimationFrame(draw);
-            analyser.getByteFrequencyData(dataArray);
-
-            bars.forEach((bar, index) => {
-                const value = dataArray[index] || 0;
-                const percentHeight = (value / 255) * 55; 
-                const finalHeight = Math.max(4, percentHeight);
-                bar.style.height = `${finalHeight}px`;
-            });
-        }
-        draw();
-    }
-
-    function resetVisualizerStyles() {
-        if (animationFrameId) cancelAnimationFrame(animationFrameId);
-        const bars = document.querySelectorAll('.bar');
-        bars.forEach(bar => bar.style.height = '4px');
-    }
-
-    function createExplosion(x, y) {
-        const icons = ['✨', '⭐', '🌸', '💖']; 
-        const sparkCount = 8; 
-
-        for (let i = 0; i < sparkCount; i++) {
-            const spark = document.createElement('div');
-            spark.classList.add('sparkle');
-            spark.innerHTML = icons[Math.floor(Math.random() * icons.length)];
-            spark.style.left = x + 'px';
-            spark.style.top = y + 'px';
-
-            const angle = Math.random() * Math.PI * 2;
-            const distance = Math.random() * 60 + 40; 
-            
-            const ex = Math.cos(angle) * distance + 'px';
-            const ey = Math.sin(angle) * distance + 'px';
-            const erot = (Math.random() * 360) + 'deg';
-
-            spark.style.setProperty('--ex', ex);
-            spark.style.setProperty('--ey', ey);
-            spark.style.setProperty('--erot', erot);
-
-            document.body.appendChild(spark);
-
-            setTimeout(() => {
-                spark.remove();
-            }, 500);
-        }
-    }
-
-    function createHeart() {
-        const heart = document.createElement('div');
-        heart.classList.add('heart');
-        heart.innerHTML = '❤️';
-        
-        heart.style.left = Math.random() * 85 + 'vw';
-        
-        const size = Math.random() * 12 + 18; 
-        heart.style.fontSize = size + 'px';
-        
-        const duration = Math.random() * 7 + 8; 
-        heart.style.animationDuration = duration + 's';
-        
-        const randomX = (Math.random() * 100 - 50) + 'px';
-        const randomRot = (Math.random() * 80 - 40) + 'deg';
-        heart.style.setProperty('--random-x', randomX);
-        heart.style.setProperty('--random-rot', randomRot);
-
-        function popHeart(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (heart.classList.contains('popped')) return;
-
-            heart.classList.add('popped');
-            
-            const rect = heart.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-
-            createExplosion(centerX, centerY);
-            heart.remove();
-
-            score++;
-            scoreCount.innerText = score;
-
-            scoreBox.classList.add('bump');
-            setTimeout(() => {
-                scoreBox.classList.remove('bump');
-            }, 100);
-        }
-
-        heart.addEventListener('touchstart', popHeart, { passive: false });
-        heart.addEventListener('mousedown', popHeart);
-        
-        document.body.appendChild(heart);
-        
-        setTimeout(() => {
-            if (heart.parentNode) heart.remove();
-        }, duration * 1000);
-    }
-
-    function startHearts() {
-        if (heartInterval) clearInterval(heartInterval);
-        heartInterval = setInterval(createHeart, 500); 
-    }
-
-    function stopHearts() {
-        if (heartInterval) clearInterval(heartInterval);
-    }
-
-    function playTrack() {
-        initAudioContext();
-        if (audioContext && audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
-
-        audio.play().then(() => { 
-            playBtn.innerText = '⏸'; 
-            renderVisualizer(); 
-            startHearts(); 
-        }).catch(() => { 
-            playBtn.innerText = '⏸'; 
-        });
-    }
-
-    function pauseTrack() { 
-        audio.pause(); 
-        playBtn.innerText = '▶'; 
-        resetVisualizerStyles(); 
-        stopHearts(); 
-    }
-
-    playBtn.addEventListener('click', () => { if (audio.paused) playTrack(); else pauseTrack(); });
-    prevBtn.addEventListener('click', () => { let index = currentTrackIndex - 1; if (index < 0) index = tracks.length - 1; loadAndPlayTrack(index); });
-    nextBtn.addEventListener('click', () => { let index = currentTrackIndex + 1; if (index >= tracks.length) index = 0; loadAndPlayTrack(index); });
-    audio.addEventListener('ended', () => { nextBtn.click(); });
-    
-    audio.addEventListener('timeupdate', () => {
-        if (audio.duration) {
-            progressBar.value = (audio.currentTime / audio.duration) * 100;
-            let mins = Math.floor(audio.currentTime / 60), secs = Math.floor(audio.currentTime % 60);
-            timeCurrent.innerText = `${mins}:${secs < 10 ? '0' + secs : secs}`;
-        }
-    });
-    
-    progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
-    
-    volumeSlider.addEventListener('input', (e) => {
-        if (gainNode) {
-            gainNode.gain.value = e.target.value;
+    playBtn.onclick = () => {
+        if (audio.paused) {
+            audio.play();
+            playBtn.innerText = "⏸ Pause";
         } else {
-            audio.volume = e.target.value;
+            audio.pause();
+            playBtn.innerText = "▶ Play";
         }
-    });
+    };
 
-    createVisualizer();
-    initPlaylist();
+    // Простая проверка клика по всему экрану для сердечек
+    document.body.onclick = (e) => {
+        if(e.target !== playBtn) {
+            score++;
+            scoreEl.innerText = score;
+        }
+    };
 </script>
 </body>
 </html>
