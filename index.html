@@ -370,6 +370,7 @@
             border-radius: 50%;
             font-size: 16px;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .playlist {
@@ -473,7 +474,7 @@
 
     <div class="header">
         <h1>Иришке</h1>
-        <p>AleksLebed • Поиск музыки</p>
+        <p>AleksLebed • Suno Playlist</p>
     </div>
 
     <div class="controls-area">
@@ -489,7 +490,7 @@
             <button class="btn" id="btn-next">⏭</button>
         </div>
 
-        <audio id="audio-player" crossorigin="anonymous" src=""></audio>
+        <audio id="audio-player" crossorigin="anonymous" src="" preload="auto"></audio>
 
         <div class="progress-container">
             <span id="time-current">0:00</span>
@@ -514,17 +515,19 @@
 <script>
     const JAMENDO_CLIENT_ID = '8d5ac48f';
 
+    // ТВОИ ЛОКАЛЬНЫЕ ТРЕКИ — они будут работать
     const defaultTracks = [
-        { id: 1, title: "Заезженный диск", duration: "4:01", file: "" },
-        { id: 2, title: "сумасшедший саксофон", duration: "4:39", file: "" },
-        { id: 3, title: "Девчонка с картинки", duration: "3:53", file: "" },
-        { id: 4, title: "танцы на битом стекле", duration: "3:12", file: "" }
+        { id: 1, title: "Заезженный диск", duration: "4:01", file: "track1.mp3" },
+        { id: 2, title: "сумасшедший саксофон", duration: "4:39", file: "track2.mp3" },
+        { id: 3, title: "Девчонка с картинки", duration: "3:53", file: "track3.mp3" },
+        { id: 4, title: "танцы на битом стекле", duration: "3:12", file: "track4.mp3" }
     ];
 
     let tracks = [...defaultTracks];
     let currentTrackIndex = -1;
     const numBars = 28;
     let score = 0;
+    let audioContextInitialized = false;
 
     const audio = document.getElementById('audio-player');
     const playBtn = document.getElementById('btn-play');
@@ -566,6 +569,7 @@
         "Ты очень красивая, и это видно без всяких слов 💖"
     ];
 
+    // ПОИСК
     async function searchJamendo(query) {
         try {
             const response = await fetch(
@@ -605,6 +609,7 @@
 
         document.querySelectorAll('.add-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const audioUrl = btn.dataset.audio;
                 const title = btn.dataset.title;
                 const artist = btn.dataset.artist;
@@ -651,6 +656,7 @@
         }
     });
 
+    // ПЛЕЙЛИСТ
     menuToggle.addEventListener('click', () => {
         playlistContainer.classList.toggle('hidden');
         menuToggle.innerHTML = playlistContainer.classList.contains('hidden') ? '☰' : '✕';
@@ -680,6 +686,7 @@
             source.connect(analyser);
             source.connect(gainNode);
             gainNode.connect(audioContext.destination);
+            audioContextInitialized = true;
         }
     }
 
@@ -699,6 +706,7 @@
         if (index < 0 || index >= tracks.length) return;
         currentTrackIndex = index;
         audio.src = tracks[index].file;
+        audio.load();
         currentTitle.innerText = tracks[index].title;
         timeDuration.innerText = tracks[index].duration;
         timeCurrent.innerText = "0:00";
@@ -711,7 +719,8 @@
 
     function loadAndPlayTrack(index) {
         loadTrack(index);
-        playTrack();
+        // Небольшая задержка для загрузки
+        setTimeout(() => playTrack(), 200);
     }
 
     function renderVisualizer() {
@@ -826,15 +835,25 @@
     }
 
     function playTrack() {
-        if (currentTrackIndex < 0) return;
-        initAudioContext();
-        if (audioContext && audioContext.state === 'suspended') audioContext.resume();
-        audio.play().then(() => {
-            playBtn.innerText = '⏸';
-            renderVisualizer();
-            startHearts();
-            startLoveMessages();
-        }).catch(() => { playBtn.innerText = '⏸'; });
+        if (currentTrackIndex < 0 || currentTrackIndex >= tracks.length) return;
+
+        const playPromise = audio.play();
+
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                playBtn.innerText = '⏸';
+                // Инициализируем аудиоконтекст после успешного воспроизведения
+                if (!audioContextInitialized) {
+                    initAudioContext();
+                }
+                renderVisualizer();
+                startHearts();
+                startLoveMessages();
+            }).catch(error => {
+                console.error('Ошибка воспроизведения:', error);
+                playBtn.innerText = '▶';
+            });
+        }
     }
 
     function pauseTrack() {
@@ -845,9 +864,20 @@
         stopLoveMessages();
     }
 
+    // Управление
     playBtn.addEventListener('click', () => {
-        if (currentTrackIndex < 0) return;
-        if (audio.paused) playTrack(); else pauseTrack();
+        if (currentTrackIndex < 0) {
+            // Если трек не выбран — выбери первый
+            if (tracks.length > 0) {
+                loadAndPlayTrack(0);
+            }
+            return;
+        }
+        if (audio.paused) {
+            playTrack();
+        } else {
+            pauseTrack();
+        }
     });
 
     prevBtn.addEventListener('click', () => {
@@ -864,7 +894,12 @@
         loadAndPlayTrack(index);
     });
 
-    audio.addEventListener('ended', () => nextBtn.click());
+    audio.addEventListener('ended', () => {
+        if (tracks.length === 0) return;
+        let index = currentTrackIndex + 1;
+        if (index >= tracks.length) index = 0;
+        loadAndPlayTrack(index);
+    });
 
     audio.addEventListener('timeupdate', () => {
         if (audio.duration) {
@@ -884,6 +919,7 @@
         else audio.volume = e.target.value;
     });
 
+    // Инициализация
     createVisualizer();
     initPlaylist();
 </script>
