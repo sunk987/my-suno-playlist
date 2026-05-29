@@ -91,17 +91,11 @@
             position: relative;
             z-index: 3;
             display: flex;
-            flex-direction: column;
-            gap: 6px;
+            gap: 8px;
+            align-items: center;
             padding: 15px 15px 8px 15px;
             background: rgba(12, 2, 5, 0.8);
             backdrop-filter: blur(10px);
-        }
-
-        .search-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
         }
 
         .search-input {
@@ -155,40 +149,6 @@
             flex-shrink: 0;
         }
 
-        .url-row {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .url-input {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            color: #fff;
-            padding: 8px 12px;
-            font-size: 11px;
-            outline: none;
-        }
-
-        .url-input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 10px;
-        }
-
-        .add-url-btn {
-            background: #28a745;
-            border: none;
-            color: #fff;
-            font-size: 16px;
-            padding: 8px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            flex-shrink: 0;
-            font-weight: 600;
-        }
-
         .scrollable-content {
             position: relative;
             z-index: 2;
@@ -197,6 +157,46 @@
             padding: 0 15px 10px 15px;
             display: flex;
             flex-direction: column;
+        }
+
+        .search-results {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 8px 0;
+            flex-shrink: 0;
+        }
+
+        .search-results.hidden {
+            display: none;
+        }
+
+        .search-result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 4px;
+            background-color: rgba(0, 0, 0, 0.4);
+            font-size: 13px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .search-result-item:hover {
+            background: rgba(255, 42, 95, 0.3);
+        }
+
+        .search-result-item .play-now {
+            background: #ff4171;
+            border: none;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-weight: 600;
         }
 
         .compact-player {
@@ -465,21 +465,14 @@
     <div class="player-overlay"></div>
 
     <div class="top-bar">
-        <!-- Строка поиска (открывает Яндекс.Музыку) -->
-        <div class="search-row">
-            <input type="text" class="search-input" id="search-input" placeholder="🔍  Поиск на Яндекс.Музыке...">
-            <button class="search-btn" id="search-btn">🔍</button>
-            <button class="menu-toggle" id="menu-toggle" aria-label="Показать плейлист">☰</button>
-        </div>
-        
-        <!-- Строка для вставки прямой ссылки на mp3 -->
-        <div class="url-row">
-            <input type="text" class="url-input" id="url-input" placeholder="Вставь прямую ссылку на .mp3...">
-            <button class="add-url-btn" id="add-url-btn">+ Добавить</button>
-        </div>
+        <input type="text" class="search-input" id="search-input" placeholder="🔍  Поиск музыки...">
+        <button class="search-btn" id="search-btn">🔍</button>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Показать плейлист">☰</button>
     </div>
 
     <div class="scrollable-content">
+        <ul class="search-results hidden" id="search-results"></ul>
+
         <div class="compact-player">
             <div class="player-top-row">
                 <div class="player-info">
@@ -551,8 +544,7 @@
     const loveMessageEl = document.getElementById('love-message');
     const searchInput = document.getElementById('search-input');
     const searchBtn = document.getElementById('search-btn');
-    const urlInput = document.getElementById('url-input');
-    const addUrlBtn = document.getElementById('add-url-btn');
+    const searchResults = document.getElementById('search-results');
 
     let audioContext = null;
     let analyser = null;
@@ -575,13 +567,107 @@
         "Ты очень красивая, и это видно без всяких слов 💖"
     ];
 
-    // Поиск открывает Яндекс.Музыку в новой вкладке
+    // Поиск через несколько источников
+    async function searchMusic(query) {
+        searchResults.innerHTML = '<li style="padding:15px;color:#ccc;text-align:center;">🔍 Ищем...</li>';
+        searchResults.classList.remove('hidden');
+
+        try {
+            // Пробуем SoundCloud API
+            const scResponse = await fetch(`https://api.soundcloud.com/tracks?q=${encodeURIComponent(query)}&client_id=8d5ac48f&limit=15`);
+            
+            if (scResponse.ok) {
+                const scData = await scResponse.json();
+                if (scData && scData.length > 0) {
+                    const tracks = scData.map(track => ({
+                        title: track.title,
+                        artist: track.user.username,
+                        url: track.stream_url + '?client_id=8d5ac48f',
+                        duration: Math.floor(track.duration / 1000)
+                    }));
+                    displaySearchResults(tracks);
+                    return;
+                }
+            }
+        } catch (e) {
+            console.log('SoundCloud не ответил, пробуем другое...');
+        }
+
+        // Запасной вариант — поиск через бесплатный API
+        try {
+            const response = await fetch(`https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=15`);
+            const data = await response.json();
+            
+            if (data.data && data.data.length > 0) {
+                const tracks = data.data.map(track => ({
+                    title: track.title,
+                    artist: track.artist.name,
+                    url: track.preview,
+                    duration: track.duration
+                }));
+                displaySearchResults(tracks);
+            } else {
+                searchResults.innerHTML = '<li style="padding:15px;color:#ccc;text-align:center;">Ничего не найдено 😔</li>';
+            }
+        } catch (error) {
+            searchResults.innerHTML = '<li style="padding:15px;color:#ccc;text-align:center;">Ошибка поиска 😔</li>';
+        }
+    }
+
+    function displaySearchResults(results) {
+        searchResults.innerHTML = '';
+
+        results.forEach(track => {
+            const li = document.createElement('li');
+            li.classList.add('search-result-item');
+            li.innerHTML = `
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${track.title}</div>
+                    <div style="font-size:11px;color:#ccc;">${track.artist} • ${formatTime(track.duration)}</div>
+                </div>
+                <button class="play-now" data-audio="${track.url}" data-title="${track.title}" data-artist="${track.artist}" data-duration="${track.duration}">▶ Играть</button>
+            `;
+            searchResults.appendChild(li);
+        });
+
+        document.querySelectorAll('.play-now').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const audioUrl = btn.dataset.audio;
+                const title = btn.dataset.title;
+                const artist = btn.dataset.artist;
+                const duration = parseInt(btn.dataset.duration) || 0;
+
+                const newTrack = {
+                    id: Date.now(),
+                    title: `${artist} - ${title}`,
+                    duration: formatTime(duration),
+                    file: audioUrl
+                };
+
+                // Добавляем в плейлист
+                tracks.push(newTrack);
+                initPlaylist();
+                
+                // Сразу играем
+                loadAndPlayTrack(tracks.length - 1);
+                
+                searchResults.classList.add('hidden');
+                searchInput.value = '';
+            });
+        });
+    }
+
+    function formatTime(seconds) {
+        if (!seconds || seconds === 0) return '?:??';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' + secs : secs}`;
+    }
+
     function performSearch() {
         const query = searchInput.value.trim();
-        if (query) {
-            window.open(`https://music.yandex.ru/search?text=${encodeURIComponent(query)}`, '_blank');
-            searchInput.value = '';
-        }
+        if (query) searchMusic(query);
     }
 
     searchBtn.addEventListener('click', performSearch);
@@ -589,25 +675,10 @@
         if (e.key === 'Enter') performSearch();
     });
 
-    // Добавление трека по прямой ссылке
-    function addTrackByUrl() {
-        const url = urlInput.value.trim();
-        if (url) {
-            const newTrack = {
-                id: Date.now(),
-                title: url.split('/').pop() || 'Новый трек',
-                duration: '?:??',
-                file: url
-            };
-            tracks.push(newTrack);
-            initPlaylist();
-            urlInput.value = '';
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-results') && !e.target.closest('.top-bar')) {
+            searchResults.classList.add('hidden');
         }
-    }
-
-    addUrlBtn.addEventListener('click', addTrackByUrl);
-    urlInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addTrackByUrl();
     });
 
     menuToggle.addEventListener('click', () => {
