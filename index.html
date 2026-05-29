@@ -97,9 +97,11 @@
         }
 
         #love-message {
-            position: relative;
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            right: 20px;
             z-index: 2;
-            margin: 70px 20px 10px 20px;
             padding: 14px 18px;
             background: rgba(255, 65, 113, 0.35);
             backdrop-filter: blur(15px);
@@ -153,7 +155,7 @@
             background: rgba(255, 42, 95, 0.4);
         }
 
-        /* ПЛЕЕР ПОДНЯТ ВЫШЕ */
+        /* ПЕРЕТАСКИВАЕМЫЙ ПЛЕЕР */
         .compact-player {
             position: absolute;
             bottom: 100px;
@@ -165,6 +167,29 @@
             padding: 18px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
+            cursor: grab;
+            transition: box-shadow 0.2s;
+            touch-action: none;
+        }
+
+        .compact-player:active {
+            cursor: grabbing;
+            box-shadow: 0 0 30px rgba(255, 42, 95, 0.5);
+        }
+
+        .compact-player.dragging {
+            cursor: grabbing;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 42, 95, 0.6);
+            transition: box-shadow 0.2s;
+        }
+
+        .drag-handle {
+            width: 40px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            margin: 0 auto 12px auto;
+            pointer-events: none;
         }
 
         .player-top-row {
@@ -227,6 +252,7 @@
             font-size: 22px;
             transition: transform 0.1s;
             padding: 6px;
+            touch-action: manipulation;
         }
 
         .btn:active {
@@ -368,7 +394,7 @@
             color: #ccc;
         }
 
-        /* СЕРДЕЧКИ С БОЛЬШОЙ ОБЛАСТЬЮ КАСАНИЯ */
+        /* СЕРДЕЧКИ */
         .heart {
             position: fixed;
             bottom: -30px;
@@ -441,8 +467,11 @@
         <button class="menu-toggle" id="menu-toggle" aria-label="Показать плейлист">☰</button>
     </div>
 
-    <!-- ПЛЕЕР ПОДНЯТ (bottom: 100px) -->
-    <div class="compact-player">
+    <!-- ПЕРЕТАСКИВАЕМЫЙ ПЛЕЕР -->
+    <div class="compact-player" id="draggable-player">
+        <!-- Ручка для перетаскивания -->
+        <div class="drag-handle"></div>
+        
         <div class="player-top-row">
             <div class="player-info">
                 <h3 id="current-title">Выбери трек</h3>
@@ -466,7 +495,6 @@
             <span id="time-duration">0:00</span>
         </div>
 
-        <!-- РЕГУЛЯТОР ЗВУКА ТЕПЕРЬ ВИДЕН -->
         <div class="volume-row">
             <span>🔈</span>
             <input type="range" class="volume-slider" id="volume" min="0" max="1" step="0.05" value="0.7">
@@ -508,6 +536,7 @@
     const scoreBox = document.getElementById('score-box');
     const menuToggle = document.getElementById('menu-toggle');
     const loveMessageEl = document.getElementById('love-message');
+    const draggablePlayer = document.getElementById('draggable-player');
 
     let audioContext = null;
     let analyser = null;
@@ -518,6 +547,74 @@
     let messageTimeout = null;
     let heartPool = [];
     const MAX_HEARTS = 10;
+
+    // ПЕРЕТАСКИВАНИЕ ПЛЕЕРА
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
+
+    function startDrag(e) {
+        // Не перетаскиваем, если нажали на кнопку или ползунок
+        if (e.target.closest('button') || e.target.closest('input')) return;
+        
+        isDragging = true;
+        draggablePlayer.classList.add('dragging');
+        
+        const touch = e.touches ? e.touches[0] : e;
+        startX = touch.clientX;
+        startY = touch.clientY;
+        
+        const rect = draggablePlayer.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+        
+        // Переводим в абсолютное позиционирование
+        draggablePlayer.style.left = startLeft + 'px';
+        draggablePlayer.style.top = startTop + 'px';
+        draggablePlayer.style.right = 'auto';
+        draggablePlayer.style.bottom = 'auto';
+        draggablePlayer.style.margin = '0';
+        
+        e.preventDefault();
+    }
+
+    function drag(e) {
+        if (!isDragging) return;
+        
+        const touch = e.touches ? e.touches[0] : e;
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+        
+        let newLeft = startLeft + dx;
+        let newTop = startTop + dy;
+        
+        // Границы экрана
+        const maxLeft = window.innerWidth - draggablePlayer.offsetWidth;
+        const maxTop = window.innerHeight - draggablePlayer.offsetHeight;
+        
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        newTop = Math.max(0, Math.min(newTop, maxTop));
+        
+        draggablePlayer.style.left = newLeft + 'px';
+        draggablePlayer.style.top = newTop + 'px';
+        
+        e.preventDefault();
+    }
+
+    function endDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        draggablePlayer.classList.remove('dragging');
+    }
+
+    // События для мыши
+    draggablePlayer.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', endDrag);
+
+    // События для тачскрина
+    draggablePlayer.addEventListener('touchstart', startDrag, { passive: false });
+    document.addEventListener('touchmove', drag, { passive: false });
+    document.addEventListener('touchend', endDrag);
 
     const loveMessages = [
         "Ты сегодня выглядишь просто волшебно ✨",
@@ -762,7 +859,8 @@
         stopLoveMessages();
     }
 
-    playBtn.addEventListener('click', () => {
+    playBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         if (currentTrackIndex < 0) {
             if (tracks.length > 0) loadAndPlayTrack(0);
             return;
@@ -770,14 +868,16 @@
         audio.paused ? playTrack() : pauseTrack();
     });
 
-    prevBtn.addEventListener('click', () => {
+    prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         if (tracks.length === 0) return;
         let index = currentTrackIndex - 1;
         if (index < 0) index = tracks.length - 1;
         loadAndPlayTrack(index);
     });
 
-    nextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         if (tracks.length === 0) return;
         let index = currentTrackIndex + 1;
         if (index >= tracks.length) index = 0;
@@ -800,11 +900,13 @@
         }
     });
 
-    progressBar.addEventListener('input', () => {
+    progressBar.addEventListener('input', (e) => {
+        e.stopPropagation();
         if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration;
     });
 
     volumeSlider.addEventListener('input', (e) => {
+        e.stopPropagation();
         const vol = parseFloat(e.target.value);
         if (gainNode) {
             gainNode.gain.value = vol;
