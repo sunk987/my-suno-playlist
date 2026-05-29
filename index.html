@@ -31,41 +31,6 @@
             bottom: 0;
         }
 
-        .score-container {
-            position: fixed;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%) scale(1);
-            background: rgba(255, 42, 95, 0.25);
-            border: 1px solid rgba(255, 42, 95, 0.5);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 42, 95, 0.3);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: transform 0.1s ease, border-color 0.1s ease;
-            backdrop-filter: blur(5px);
-            pointer-events: none;
-        }
-
-        .score-container.bump {
-            transform: translateX(-50%) scale(1.15);
-            border-color: rgba(255, 42, 95, 0.9);
-            background: rgba(255, 42, 95, 0.4);
-        }
-
-        #score-count {
-            color: #ff4171;
-            font-size: 18px;
-            font-weight: 800;
-            text-shadow: 0 0 8px rgba(255, 65, 113, 0.8);
-        }
-
         .player-container {
             position: relative;
             width: 100vw;
@@ -96,12 +61,72 @@
             pointer-events: none;
         }
 
-        #love-message {
+        /* ВСЕ ПЕРЕТАСКИВАЕМЫЕ ЭЛЕМЕНТЫ */
+        .draggable {
             position: absolute;
+            cursor: grab;
+            touch-action: none;
+            transition: box-shadow 0.2s;
+            z-index: 100;
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+        }
+
+        .draggable.dragging {
+            cursor: grabbing;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 42, 95, 0.4);
+            z-index: 200;
+        }
+
+        /* СЧЁТЧИК СЕРДЕЧЕК */
+        .score-container {
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 42, 95, 0.25);
+            border: 1px solid rgba(255, 42, 95, 0.5);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: auto;
+            white-space: nowrap;
+        }
+
+        .score-container.dragging {
+            transform: none;
+        }
+
+        #score-count {
+            color: #ff4171;
+            font-size: 18px;
+            font-weight: 800;
+            text-shadow: 0 0 8px rgba(255, 65, 113, 0.8);
+        }
+
+        .bump-animation {
+            animation: bump 0.15s ease;
+        }
+
+        @keyframes bump {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* КОМПЛИМЕНТЫ */
+        #love-message {
             top: 70px;
             left: 20px;
             right: 20px;
-            z-index: 2;
+            max-width: calc(100vw - 40px);
             padding: 14px 18px;
             background: rgba(255, 65, 113, 0.35);
             backdrop-filter: blur(15px);
@@ -117,9 +142,11 @@
             opacity: 0;
             transform: translateY(8px);
             transition: opacity 0.6s ease, transform 0.6s ease;
-            pointer-events: none;
+            pointer-events: auto;
             min-height: 24px;
             line-height: 1.5;
+            right: auto;
+            min-width: 200px;
         }
 
         #love-message.show {
@@ -127,14 +154,10 @@
             transform: translateY(0);
         }
 
-        .top-bar {
-            position: absolute;
-            top: 25px;
-            right: 15px;
-            z-index: 3;
-        }
-
+        /* КНОПКА ПЛЕЙЛИСТА */
         .menu-toggle {
+            top: 15px;
+            right: 15px;
             background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: #fff;
@@ -145,42 +168,35 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
+            cursor: grab;
             backdrop-filter: blur(10px);
-            flex-shrink: 0;
             transition: background 0.2s;
+            left: auto;
+            bottom: auto;
         }
 
         .menu-toggle:active {
+            cursor: grabbing;
             background: rgba(255, 42, 95, 0.4);
         }
 
-        /* ПЕРЕТАСКИВАЕМЫЙ ПЛЕЕР */
+        /* ПЛЕЕР */
         .compact-player {
-            position: absolute;
             bottom: 100px;
             left: 15px;
             right: 15px;
-            z-index: 2;
             background: rgba(0, 0, 0, 0.6);
             border-radius: 22px;
             padding: 18px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            cursor: grab;
-            transition: box-shadow 0.2s;
-            touch-action: none;
-        }
-
-        .compact-player:active {
-            cursor: grabbing;
-            box-shadow: 0 0 30px rgba(255, 42, 95, 0.5);
+            max-width: 500px;
+            min-width: 300px;
+            top: auto;
         }
 
         .compact-player.dragging {
-            cursor: grabbing;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 42, 95, 0.6);
-            transition: box-shadow 0.2s;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 42, 95, 0.6);
         }
 
         .drag-handle {
@@ -341,7 +357,7 @@
             bottom: 100px;
             left: 15px;
             right: 15px;
-            z-index: 4;
+            z-index: 150;
             background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(15px);
             border-radius: 22px;
@@ -350,6 +366,7 @@
             overflow-y: auto;
             border: 1px solid rgba(255, 255, 255, 0.15);
             display: none;
+            top: auto;
         }
 
         .playlist-section:not(.hidden) {
@@ -417,12 +434,8 @@
                 transform: translateY(0) translateX(0) rotate(0deg); 
                 opacity: 0; 
             }
-            5% { 
-                opacity: 1; 
-            }
-            95% { 
-                opacity: 1; 
-            }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
             100% { 
                 transform: translateY(-110vh) translateX(var(--random-x)) rotate(var(--random-rot)); 
                 opacity: 0; 
@@ -453,23 +466,23 @@
 </head>
 <body>
 
-<div class="score-container" id="score-box">
-    <span>Поймано ❤️:</span>
-    <span id="score-count">0</span>
-</div>
-
 <div class="player-container">
     <div class="player-overlay"></div>
 
-    <div id="love-message"></div>
-
-    <div class="top-bar">
-        <button class="menu-toggle" id="menu-toggle" aria-label="Показать плейлист">☰</button>
+    <!-- ПЕРЕТАСКИВАЕМЫЙ СЧЁТЧИК -->
+    <div class="score-container draggable" id="score-box">
+        <span>Поймано ❤️:</span>
+        <span id="score-count">0</span>
     </div>
 
+    <!-- ПЕРЕТАСКИВАЕМЫЕ КОМПЛИМЕНТЫ -->
+    <div class="draggable" id="love-message"></div>
+
+    <!-- ПЕРЕТАСКИВАЕМАЯ КНОПКА ПЛЕЙЛИСТА -->
+    <button class="menu-toggle draggable" id="menu-toggle" aria-label="Показать плейлист">☰</button>
+
     <!-- ПЕРЕТАСКИВАЕМЫЙ ПЛЕЕР -->
-    <div class="compact-player" id="draggable-player">
-        <!-- Ручка для перетаскивания -->
+    <div class="compact-player draggable" id="draggable-player">
         <div class="drag-handle"></div>
         
         <div class="player-top-row">
@@ -548,73 +561,110 @@
     let heartPool = [];
     const MAX_HEARTS = 10;
 
-    // ПЕРЕТАСКИВАНИЕ ПЛЕЕРА
-    let isDragging = false;
-    let startX, startY, startLeft, startTop;
+    // УНИВЕРСАЛЬНОЕ ПЕРЕТАСКИВАНИЕ ДЛЯ ВСЕХ ЭЛЕМЕНТОВ С КЛАССОМ .draggable
+    function initDraggable(element) {
+        let isDragging = false;
+        let startX, startY, startLeft, startTop;
+        let initialTransform;
 
-    function startDrag(e) {
-        // Не перетаскиваем, если нажали на кнопку или ползунок
-        if (e.target.closest('button') || e.target.closest('input')) return;
-        
-        isDragging = true;
-        draggablePlayer.classList.add('dragging');
-        
-        const touch = e.touches ? e.touches[0] : e;
-        startX = touch.clientX;
-        startY = touch.clientY;
-        
-        const rect = draggablePlayer.getBoundingClientRect();
-        startLeft = rect.left;
-        startTop = rect.top;
-        
-        // Переводим в абсолютное позиционирование
-        draggablePlayer.style.left = startLeft + 'px';
-        draggablePlayer.style.top = startTop + 'px';
-        draggablePlayer.style.right = 'auto';
-        draggablePlayer.style.bottom = 'auto';
-        draggablePlayer.style.margin = '0';
-        
-        e.preventDefault();
+        element.addEventListener('mousedown', startDrag);
+        element.addEventListener('touchstart', startDrag, { passive: false });
+
+        function startDrag(e) {
+            // Не перетаскиваем, если нажали на кнопку или ползунок внутри элемента
+            if (e.target.closest('button:not(.menu-toggle)') || e.target.closest('input')) return;
+            
+            // Для кнопки меню разрешаем перетаскивание
+            if (element === menuToggle && e.target === menuToggle) {
+                // Разрешаем перетаскивание только если не клик (короткое нажатие)
+            }
+            
+            isDragging = true;
+            element.classList.add('dragging');
+            
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX;
+            startY = touch.clientY;
+            
+            const rect = element.getBoundingClientRect();
+            startLeft = rect.left;
+            startTop = rect.top;
+            
+            // Сохраняем текущую трансформацию
+            initialTransform = element.style.transform || '';
+            
+            // Убираем transform и переводим в абсолютные координаты
+            element.style.transform = 'none';
+            element.style.left = startLeft + 'px';
+            element.style.top = startTop + 'px';
+            element.style.right = 'auto';
+            element.style.bottom = 'auto';
+            
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            
+            const touch = e.touches ? e.touches[0] : e;
+            const dx = touch.clientX - startX;
+            const dy = touch.clientY - startY;
+            
+            let newLeft = startLeft + dx;
+            let newTop = startTop + dy;
+            
+            // Границы экрана
+            const maxLeft = window.innerWidth - element.offsetWidth;
+            const maxTop = window.innerHeight - element.offsetHeight;
+            
+            newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+            newTop = Math.max(0, Math.min(newTop, maxTop));
+            
+            element.style.left = newLeft + 'px';
+            element.style.top = newTop + 'px';
+            
+            e.preventDefault();
+        }
+
+        function endDrag(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            element.classList.remove('dragging');
+            
+            // Если это был короткий клик по кнопке меню — открываем плейлист
+            if (element === menuToggle) {
+                const touch = e.changedTouches ? e.changedTouches[0] : e;
+                const dx = Math.abs(touch.clientX - startX);
+                const dy = Math.abs(touch.clientY - startY);
+                
+                if (dx < 10 && dy < 10) {
+                    // Это был клик, а не перетаскивание
+                    togglePlaylist();
+                }
+            }
+        }
+
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', endDrag);
     }
 
-    function drag(e) {
-        if (!isDragging) return;
-        
-        const touch = e.touches ? e.touches[0] : e;
-        const dx = touch.clientX - startX;
-        const dy = touch.clientY - startY;
-        
-        let newLeft = startLeft + dx;
-        let newTop = startTop + dy;
-        
-        // Границы экрана
-        const maxLeft = window.innerWidth - draggablePlayer.offsetWidth;
-        const maxTop = window.innerHeight - draggablePlayer.offsetHeight;
-        
-        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-        newTop = Math.max(0, Math.min(newTop, maxTop));
-        
-        draggablePlayer.style.left = newLeft + 'px';
-        draggablePlayer.style.top = newTop + 'px';
-        
-        e.preventDefault();
+    // Инициализируем перетаскивание для всех draggable-элементов
+    const draggableElements = document.querySelectorAll('.draggable');
+    draggableElements.forEach(el => initDraggable(el));
+
+    function togglePlaylist() {
+        playlistSection.classList.toggle('hidden');
+        menuToggle.innerHTML = playlistSection.classList.contains('hidden') ? '☰' : '✕';
     }
 
-    function endDrag() {
-        if (!isDragging) return;
-        isDragging = false;
-        draggablePlayer.classList.remove('dragging');
-    }
-
-    // События для мыши
-    draggablePlayer.addEventListener('mousedown', startDrag);
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('mouseup', endDrag);
-
-    // События для тачскрина
-    draggablePlayer.addEventListener('touchstart', startDrag, { passive: false });
-    document.addEventListener('touchmove', drag, { passive: false });
-    document.addEventListener('touchend', endDrag);
+    // Отдельный обработчик клика для меню (если не было перетаскивания)
+    menuToggle.addEventListener('click', (e) => {
+        // Этот обработчик сработает только если не было перетаскивания
+        e.stopPropagation();
+    });
 
     const loveMessages = [
         "Ты сегодня выглядишь просто волшебно ✨",
@@ -628,11 +678,6 @@
         "Твоё присутствие — это наслаждение, хочется быть рядом всегда 🌹",
         "Ты очень красивая, и это видно без всяких слов 💖"
     ];
-
-    menuToggle.addEventListener('click', () => {
-        playlistSection.classList.toggle('hidden');
-        menuToggle.innerHTML = playlistSection.classList.contains('hidden') ? '☰' : '✕';
-    });
 
     function createVisualizer() {
         visualizer.innerHTML = '';
@@ -779,8 +824,9 @@
             score++;
             scoreCount.innerText = score;
             
-            scoreBox.classList.add('bump');
-            setTimeout(() => scoreBox.classList.remove('bump'), 100);
+            // Анимация bump для счётчика
+            scoreBox.classList.add('bump-animation');
+            setTimeout(() => scoreBox.classList.remove('bump-animation'), 150);
         }
 
         heart.addEventListener('pointerdown', popHeart, { passive: false });
