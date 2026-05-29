@@ -59,7 +59,7 @@
         .player-container {
             position: relative;
             width: 100%;
-            max-width: 500px;
+            max-width: 400px;
             background-image: url('cover.jpg');
             background-size: cover;
             background-position: center;
@@ -71,8 +71,6 @@
             flex-direction: column;
             box-sizing: border-box;
             z-index: 10;
-            height: 90vh;
-            max-height: 750px;
             overflow: hidden;
         }
 
@@ -82,55 +80,47 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(180deg, rgba(18, 3, 7, 0.4) 0%, rgba(18, 3, 7, 0.85) 100%);
+            background: linear-gradient(180deg, rgba(18, 3, 7, 0.3) 0%, rgba(18, 3, 7, 0.85) 100%);
             z-index: 1;
             pointer-events: none;
+        }
+
+        /* КОМПЛИМЕНТЫ — ТЕПЕРЬ НАД ПЛЕЕРОМ */
+        #love-message {
+            position: relative;
+            z-index: 2;
+            margin: 15px 15px 5px 15px;
+            padding: 14px 18px;
+            background: rgba(255, 65, 113, 0.3);
+            backdrop-filter: blur(12px);
+            border-radius: 20px 20px 20px 4px;
+            border: 1px solid rgba(255, 130, 160, 0.5);
+            color: #fff0f5;
+            font-size: 16px;
+            font-style: italic;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 42, 95, 0.3);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            pointer-events: none;
+            min-height: 24px;
+            line-height: 1.4;
+        }
+
+        #love-message.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .top-bar {
             position: relative;
             z-index: 3;
             display: flex;
-            gap: 8px;
-            align-items: center;
-            padding: 15px 15px 8px 15px;
-            background: rgba(12, 2, 5, 0.8);
-            backdrop-filter: blur(10px);
-        }
-
-        .search-input {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid rgba(255, 65, 113, 0.8);
-            border-radius: 25px;
-            color: #fff;
-            padding: 12px 18px;
-            font-size: 15px;
-            backdrop-filter: blur(5px);
-            outline: none;
-            min-width: 0;
-            box-shadow: 0 0 15px rgba(255, 42, 95, 0.4);
-        }
-
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 14px;
-        }
-
-        .search-btn {
-            background: linear-gradient(135deg, #ff4171, #d0003c);
-            border: none;
-            color: #fff;
-            font-size: 20px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(255, 42, 95, 0.6);
-            flex-shrink: 0;
+            justify-content: flex-end;
+            padding: 5px 15px 0 15px;
         }
 
         .menu-toggle {
@@ -149,62 +139,13 @@
             flex-shrink: 0;
         }
 
-        .scrollable-content {
+        .compact-player {
             position: relative;
             z-index: 2;
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 15px 10px 15px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .search-results {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 8px 0;
-            flex-shrink: 0;
-        }
-
-        .search-results.hidden {
-            display: none;
-        }
-
-        .search-result-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            border-radius: 10px;
-            margin-bottom: 4px;
-            background-color: rgba(0, 0, 0, 0.4);
-            font-size: 13px;
-            transition: background 0.2s;
-            cursor: pointer;
-        }
-
-        .search-result-item:hover {
-            background: rgba(255, 42, 95, 0.3);
-        }
-
-        .search-result-item .play-now {
-            background: #ff4171;
-            border: none;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            cursor: pointer;
-            flex-shrink: 0;
-            font-weight: 600;
-        }
-
-        .compact-player {
-            flex-shrink: 0;
             background: rgba(0, 0, 0, 0.5);
-            border-radius: 16px;
-            padding: 12px 15px;
-            margin-top: auto;
+            border-radius: 20px;
+            padding: 15px;
+            margin: 10px 15px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(5px);
         }
@@ -213,7 +154,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .player-info {
@@ -222,7 +163,7 @@
         }
 
         #current-title {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             margin: 0;
             color: #fff;
@@ -233,15 +174,15 @@
 
         .visualizer-area {
             width: 100%;
-            height: 35px;
+            height: 45px;
             background: rgba(0, 0, 0, 0.4);
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: flex-end;
             justify-content: space-between;
-            padding: 5px;
+            padding: 6px;
             box-sizing: border-box;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
@@ -257,8 +198,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 18px;
-            margin-bottom: 6px;
+            gap: 20px;
+            margin-bottom: 10px;
         }
 
         .btn {
@@ -266,30 +207,30 @@
             border: none;
             color: #fff;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 20px;
             transition: transform 0.1s;
             padding: 4px;
         }
 
         .btn-play {
             background: linear-gradient(135deg, #ff4171, #d0003c);
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 16px;
-            box-shadow: 0 0 12px rgba(255, 42, 95, 0.5);
+            font-size: 18px;
+            box-shadow: 0 0 15px rgba(255, 42, 95, 0.5);
         }
 
         .progress-container {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 9px;
+            gap: 8px;
+            font-size: 10px;
             color: #ccc;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .progress-bar-wrapper {
@@ -311,8 +252,8 @@
         .progress-bar::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             background: #fff;
             box-shadow: 0 0 5px #ff2a5f;
@@ -321,8 +262,8 @@
         .volume-row {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 11px;
+            gap: 8px;
+            font-size: 12px;
         }
 
         .volume-slider {
@@ -338,42 +279,19 @@
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #ff2a5f;
         }
 
-        #love-message {
-            margin: 6px 0;
-            padding: 6px 12px;
-            background: rgba(255, 65, 113, 0.25);
-            backdrop-filter: blur(8px);
-            border-radius: 16px 16px 16px 4px;
-            border: 1px solid rgba(255, 130, 160, 0.4);
-            color: #fff0f5;
-            font-size: 12px;
-            font-style: italic;
-            text-align: center;
-            box-shadow: 0 0 10px rgba(255, 42, 95, 0.25);
-            opacity: 0;
-            transform: translateY(6px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            pointer-events: none;
-            min-height: 16px;
-        }
-
-        #love-message.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
         .playlist-section {
-            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
             border-top: 1px solid rgba(255, 255, 255, 0.15);
-            padding-top: 8px;
-            margin-top: 8px;
-            max-height: 120px;
+            margin: 10px 15px;
+            padding: 10px 0;
+            max-height: 160px;
             overflow-y: auto;
         }
 
@@ -391,28 +309,33 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 10px;
-            border-radius: 8px;
+            padding: 8px 12px;
+            border-radius: 10px;
             cursor: pointer;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
             background-color: rgba(0, 0, 0, 0.3);
-            font-size: 11px;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .track-item:hover {
+            background: rgba(255, 42, 95, 0.2);
         }
 
         .track-item.active {
-            background: linear-gradient(90deg, rgba(255, 42, 95, 0.35), transparent);
-            border-left: 2px solid #ff2a5f;
+            background: linear-gradient(90deg, rgba(255, 42, 95, 0.4), transparent);
+            border-left: 3px solid #ff2a5f;
         }
 
         .track-details h4 {
             margin: 0;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 500;
             color: #fff;
         }
 
         .track-duration {
-            font-size: 10px;
+            font-size: 11px;
             color: #ccc;
         }
 
@@ -464,63 +387,58 @@
 <div class="player-container">
     <div class="player-overlay"></div>
 
+    <!-- КОМПЛИМЕНТЫ НАД ПЛЕЕРОМ -->
+    <div id="love-message"></div>
+
     <div class="top-bar">
-        <input type="text" class="search-input" id="search-input" placeholder="🔍  Поиск русской музыки...">
-        <button class="search-btn" id="search-btn">🔍</button>
         <button class="menu-toggle" id="menu-toggle" aria-label="Показать плейлист">☰</button>
     </div>
 
-    <div class="scrollable-content">
-        <ul class="search-results hidden" id="search-results"></ul>
-
-        <div class="compact-player">
-            <div class="player-top-row">
-                <div class="player-info">
-                    <h3 id="current-title">Выбери трек</h3>
-                </div>
-                <div class="controls">
-                    <button class="btn" id="btn-prev">⏮</button>
-                    <button class="btn btn-play" id="btn-play">▶</button>
-                    <button class="btn" id="btn-next">⏭</button>
-                </div>
+    <div class="compact-player">
+        <div class="player-top-row">
+            <div class="player-info">
+                <h3 id="current-title">Выбери трек</h3>
             </div>
-
-            <audio id="audio-player" crossorigin="anonymous" src="" preload="auto"></audio>
-
-            <div class="visualizer-area" id="visualizer"></div>
-
-            <div class="progress-container">
-                <span id="time-current">0:00</span>
-                <div class="progress-bar-wrapper">
-                    <input type="range" class="progress-bar" id="progress" min="0" max="100" value="0">
-                </div>
-                <span id="time-duration">0:00</span>
+            <div class="controls">
+                <button class="btn" id="btn-prev">⏮</button>
+                <button class="btn btn-play" id="btn-play">▶</button>
+                <button class="btn" id="btn-next">⏭</button>
             </div>
-
-            <div class="volume-row">
-                <span>🔈</span>
-                <input type="range" class="volume-slider" id="volume" min="0" max="1" step="0.05" value="0.7">
-                <span>🔊</span>
-            </div>
-
-            <div id="love-message"></div>
         </div>
 
-        <div class="playlist-section hidden" id="playlist-section">
-            <ul class="playlist" id="playlist-container"></ul>
+        <audio id="audio-player" crossorigin="anonymous" src="" preload="auto"></audio>
+
+        <div class="visualizer-area" id="visualizer"></div>
+
+        <div class="progress-container">
+            <span id="time-current">0:00</span>
+            <div class="progress-bar-wrapper">
+                <input type="range" class="progress-bar" id="progress" min="0" max="100" value="0">
+            </div>
+            <span id="time-duration">0:00</span>
         </div>
+
+        <div class="volume-row">
+            <span>🔈</span>
+            <input type="range" class="volume-slider" id="volume" min="0" max="1" step="0.05" value="0.7">
+            <span>🔊</span>
+        </div>
+    </div>
+
+    <div class="playlist-section hidden" id="playlist-section">
+        <ul class="playlist" id="playlist-container"></ul>
     </div>
 </div>
 
 <script>
-    const defaultTracks = [
+    // Твои локальные треки
+    const tracks = [
         { id: 1, title: "Заезженный диск", duration: "4:01", file: "track1.mp3" },
         { id: 2, title: "сумасшедший саксофон", duration: "4:39", file: "track2.mp3" },
         { id: 3, title: "Девчонка с картинки", duration: "3:53", file: "track3.mp3" },
         { id: 4, title: "танцы на битом стекле", duration: "3:12", file: "track4.mp3" }
     ];
 
-    let tracks = [...defaultTracks];
     let currentTrackIndex = -1;
     const numBars = 32;
     let score = 0;
@@ -542,9 +460,6 @@
     const scoreBox = document.getElementById('score-box');
     const menuToggle = document.getElementById('menu-toggle');
     const loveMessageEl = document.getElementById('love-message');
-    const searchInput = document.getElementById('search-input');
-    const searchBtn = document.getElementById('search-btn');
-    const searchResults = document.getElementById('search-results');
 
     let audioContext = null;
     let analyser = null;
@@ -566,101 +481,6 @@
         "Твоё присутствие — это наслаждение, хочется быть рядом всегда 🌹",
         "Ты очень красивая, и это видно без всяких слов 💖"
     ];
-
-    // Поиск через YouTube (открывается в плеере через embed)
-    function performSearch() {
-        const query = searchInput.value.trim();
-        if (query) {
-            // Открываем YouTube Music с поиском
-            window.open(`https://music.youtube.com/search?q=${encodeURIComponent(query)}`, '_blank');
-            
-            // Показываем подсказку
-            searchResults.innerHTML = `
-                <li style="padding:15px;color:#ccc;text-align:center;background:rgba(0,0,0,0.4);border-radius:10px;">
-                    🔗 YouTube Music открыт в новой вкладке<br>
-                    <small style="color:#ff4171;">Найди трек и скопируй ссылку</small><br><br>
-                    <input type="text" id="yt-link-input" placeholder="Вставь ссылку на видео..." 
-                           style="width:100%;padding:8px;border-radius:15px;border:1px solid #ff4171;background:rgba(0,0,0,0.5);color:#fff;font-size:12px;text-align:center;">
-                    <button id="add-yt-btn" style="margin-top:8px;background:#ff4171;border:none;color:#fff;padding:8px 20px;border-radius:15px;cursor:pointer;font-weight:600;">
-                        ▶ Играть
-                    </button>
-                </li>`;
-            searchResults.classList.remove('hidden');
-
-            // Обработчик для добавления по ссылке YouTube
-            setTimeout(() => {
-                const addBtn = document.getElementById('add-yt-btn');
-                const linkInput = document.getElementById('yt-link-input');
-                if (addBtn && linkInput) {
-                    addBtn.addEventListener('click', () => {
-                        const link = linkInput.value.trim();
-                        if (link) {
-                            // Конвертируем YouTube ссылку в аудио через прокси
-                            const audioUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${extractYouTubeID(link)}`)}`;
-                            
-                            const newTrack = {
-                                id: Date.now(),
-                                title: 'Трек с YouTube',
-                                duration: '?:??',
-                                file: link // Сохраняем оригинальную ссылку
-                            };
-                            
-                            tracks.push(newTrack);
-                            initPlaylist();
-                            searchResults.classList.add('hidden');
-                            searchInput.value = '';
-                            
-                            // Пробуем играть напрямую через YouTube embed
-                            loadYouTubeAudio(link);
-                        }
-                    });
-                }
-            }, 100);
-        }
-    }
-
-    function extractYouTubeID(url) {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    function loadYouTubeAudio(youtubeUrl) {
-        // Создаём скрытый iframe для YouTube
-        const videoId = extractYouTubeID(youtubeUrl);
-        if (!videoId) return;
-
-        // Используем YouTube IFrame API для аудио
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&loop=0`;
-        iframe.allow = 'autoplay';
-        document.body.appendChild(iframe);
-
-        // Обновляем интерфейс
-        playBtn.innerText = '⏸';
-        currentTitle.innerText = 'Играет с YouTube';
-        
-        // Сердечки и визуализатор
-        startHearts();
-        startLoveMessages();
-        
-        // Удаляем iframe через некоторое время
-        setTimeout(() => {
-            document.body.removeChild(iframe);
-        }, 300000); // 5 минут
-    }
-
-    searchBtn.addEventListener('click', performSearch);
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') performSearch();
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-results') && !e.target.closest('.top-bar')) {
-            searchResults.classList.add('hidden');
-        }
-    });
 
     menuToggle.addEventListener('click', () => {
         playlistSection.classList.toggle('hidden');
@@ -738,7 +558,7 @@
             analyser.getByteFrequencyData(dataArray);
             bars.forEach((bar, index) => {
                 const value = dataArray[index] || 0;
-                const percentHeight = (value / 255) * 30;
+                const percentHeight = (value / 255) * 35;
                 const finalHeight = Math.max(3, percentHeight);
                 bar.style.height = `${finalHeight}px`;
             });
@@ -817,7 +637,7 @@
         loveMessageEl.textContent = msg;
         loveMessageEl.classList.add('show');
         clearTimeout(messageTimeout);
-        messageTimeout = setTimeout(() => loveMessageEl.classList.remove('show'), 4000);
+        messageTimeout = setTimeout(() => loveMessageEl.classList.remove('show'), 5000);
     }
 
     function scheduleNextMessage() {
