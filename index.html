@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Плейлист: Иришке</title>
     <style>
         * {
@@ -265,6 +265,7 @@
             height: 4px;
             border-radius: 2px;
             outline: none;
+            cursor: pointer;
         }
 
         .progress-bar::-webkit-slider-thumb {
@@ -275,13 +276,16 @@
             border-radius: 50%;
             background: #fff;
             box-shadow: 0 0 8px #ff2a5f;
+            cursor: pointer;
         }
 
         .volume-row {
-            display: flex;
+            display: flex !important;
             align-items: center;
             gap: 8px;
             font-size: 13px;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
         .volume-slider {
@@ -292,6 +296,10 @@
             height: 4px;
             border-radius: 2px;
             outline: none;
+            cursor: pointer;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
         .volume-slider::-webkit-slider-thumb {
@@ -301,6 +309,7 @@
             height: 12px;
             border-radius: 50%;
             background: #ff2a5f;
+            cursor: pointer;
         }
 
         .playlist-section {
@@ -362,7 +371,7 @@
             color: #ccc;
         }
 
-        /* ОПТИМИЗИРОВАННЫЕ СЕРДЕЧКИ */
+        /* СЕРДЕЧКИ С БОЛЬШОЙ ОБЛАСТЬЮ КАСАНИЯ */
         .heart {
             position: fixed;
             bottom: -30px;
@@ -376,6 +385,9 @@
             will-change: transform;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            /* УВЕЛИЧЕННАЯ ОБЛАСТЬ КАСАНИЯ */
+            padding: 25px;
+            margin: -25px;
         }
 
         @keyframes flyUp {
@@ -457,9 +469,9 @@
             <span id="time-duration">0:00</span>
         </div>
 
-        <div class="volume-row">
+        <div class="volume-row" style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
             <span>🔈</span>
-            <input type="range" class="volume-slider" id="volume" min="0" max="1" step="0.05" value="0.7">
+            <input type="range" class="volume-slider" id="volume" min="0" max="1" step="0.05" value="0.7" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
             <span>🔊</span>
         </div>
     </div>
@@ -507,7 +519,7 @@
     let heartInterval = null;
     let messageTimeout = null;
     let heartPool = [];
-    const MAX_HEARTS = 12;
+    const MAX_HEARTS = 10;
 
     const loveMessages = [
         "Ты сегодня выглядишь просто волшебно ✨",
@@ -521,6 +533,9 @@
         "Твоё присутствие — это наслаждение, хочется быть рядом всегда 🌹",
         "Ты очень красивая, и это видно без всяких слов 💖"
     ];
+
+    console.log('Громкость:', volumeSlider);
+    console.log('Стиль громкости:', window.getComputedStyle(volumeSlider).display);
 
     menuToggle.addEventListener('click', () => {
         playlistSection.classList.toggle('hidden');
@@ -612,7 +627,6 @@
         bars.forEach(bar => bar.style.height = '3px');
     }
 
-    // Оптимизированные искры
     function createExplosion(x, y) {
         const icons = ['✨', '⭐', '💖'];
         for (let i = 0; i < 5; i++) {
@@ -631,9 +645,7 @@
         }
     }
 
-    // Оптимизированные сердечки
     function createHeart() {
-        // Очищаем старые сердечки
         heartPool = heartPool.filter(h => h.parentNode);
         
         if (heartPool.length >= MAX_HEARTS) {
@@ -644,8 +656,8 @@
         const heart = document.createElement('div');
         heart.classList.add('heart');
         heart.innerHTML = '❤️';
-        heart.style.left = Math.random() * 85 + 'vw';
-        heart.style.fontSize = (Math.random() * 14 + 22) + 'px';
+        heart.style.left = Math.random() * 80 + 'vw';
+        heart.style.fontSize = (Math.random() * 14 + 24) + 'px';
         const duration = Math.random() * 6 + 8;
         heart.style.animationDuration = duration + 's';
         heart.style.setProperty('--random-x', (Math.random() * 80 - 40) + 'px');
@@ -665,12 +677,12 @@
             
             heart.style.opacity = '0';
             heart.style.transform = 'scale(1.5)';
-            heart.style.transition = 'all 0.2s ease';
+            heart.style.transition = 'all 0.15s ease';
             
             setTimeout(() => {
                 if (heart.parentNode) heart.remove();
                 heartPool = heartPool.filter(h => h !== heart);
-            }, 200);
+            }, 150);
             
             score++;
             scoreCount.innerText = score;
@@ -695,12 +707,11 @@
 
     function startHearts() {
         if (heartInterval) clearInterval(heartInterval);
-        heartInterval = setInterval(createHeart, 800); // Увеличил интервал
+        heartInterval = setInterval(createHeart, 900);
     }
 
     function stopHearts() {
         if (heartInterval) clearInterval(heartInterval);
-        // Очищаем все сердечки
         heartPool.forEach(h => { if (h.parentNode) h.remove(); });
         heartPool = [];
     }
@@ -798,9 +809,15 @@
         if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration;
     });
 
+    // Регулировка громкости
     volumeSlider.addEventListener('input', (e) => {
-        if (gainNode) gainNode.gain.value = e.target.value;
-        else audio.volume = e.target.value;
+        const vol = parseFloat(e.target.value);
+        if (gainNode) {
+            gainNode.gain.value = vol;
+        } else {
+            audio.volume = vol;
+        }
+        console.log('Громкость изменена:', vol);
     });
 
     createVisualizer();
