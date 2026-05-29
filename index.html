@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Плейлист: Иришке</title>
     <style>
         * {
@@ -21,6 +21,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            min-height: 100dvh;
             box-sizing: border-box;
             overflow: hidden;
             position: fixed;
@@ -69,6 +70,7 @@
             position: relative;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             background-image: url('cover.jpg');
             background-size: cover;
             background-position: center;
@@ -97,14 +99,14 @@
         #love-message {
             position: relative;
             z-index: 2;
-            margin: 80px 20px 10px 20px;
-            padding: 16px 20px;
+            margin: 70px 20px 10px 20px;
+            padding: 14px 18px;
             background: rgba(255, 65, 113, 0.35);
             backdrop-filter: blur(15px);
             border-radius: 20px 20px 20px 4px;
             border: 1px solid rgba(255, 130, 160, 0.5);
             color: #fff0f5;
-            font-size: 18px;
+            font-size: 17px;
             font-style: italic;
             font-weight: 500;
             letter-spacing: 0.5px;
@@ -114,7 +116,7 @@
             transform: translateY(8px);
             transition: opacity 0.6s ease, transform 0.6s ease;
             pointer-events: none;
-            min-height: 28px;
+            min-height: 24px;
             line-height: 1.5;
         }
 
@@ -151,9 +153,10 @@
             background: rgba(255, 42, 95, 0.4);
         }
 
+        /* ПЛЕЕР ПОДНЯТ ВЫШЕ */
         .compact-player {
             position: absolute;
-            bottom: 20px;
+            bottom: 100px;
             left: 15px;
             right: 15px;
             z-index: 2;
@@ -280,12 +283,10 @@
         }
 
         .volume-row {
-            display: flex !important;
+            display: flex;
             align-items: center;
             gap: 8px;
             font-size: 13px;
-            visibility: visible !important;
-            opacity: 1 !important;
         }
 
         .volume-slider {
@@ -297,9 +298,6 @@
             border-radius: 2px;
             outline: none;
             cursor: pointer;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
         }
 
         .volume-slider::-webkit-slider-thumb {
@@ -314,18 +312,17 @@
 
         .playlist-section {
             position: absolute;
-            bottom: 20px;
+            bottom: 100px;
             left: 15px;
             right: 15px;
             z-index: 4;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(15px);
             border-radius: 22px;
             padding: 10px 0;
-            max-height: 180px;
+            max-height: 200px;
             overflow-y: auto;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            transform: translateY(calc(-100% - 30px));
             display: none;
         }
 
@@ -385,7 +382,6 @@
             will-change: transform;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
-            /* УВЕЛИЧЕННАЯ ОБЛАСТЬ КАСАНИЯ */
             padding: 25px;
             margin: -25px;
         }
@@ -445,6 +441,7 @@
         <button class="menu-toggle" id="menu-toggle" aria-label="Показать плейлист">☰</button>
     </div>
 
+    <!-- ПЛЕЕР ПОДНЯТ (bottom: 100px) -->
     <div class="compact-player">
         <div class="player-top-row">
             <div class="player-info">
@@ -469,9 +466,10 @@
             <span id="time-duration">0:00</span>
         </div>
 
-        <div class="volume-row" style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
+        <!-- РЕГУЛЯТОР ЗВУКА ТЕПЕРЬ ВИДЕН -->
+        <div class="volume-row">
             <span>🔈</span>
-            <input type="range" class="volume-slider" id="volume" min="0" max="1" step="0.05" value="0.7" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+            <input type="range" class="volume-slider" id="volume" min="0" max="1" step="0.05" value="0.7">
             <span>🔊</span>
         </div>
     </div>
@@ -533,9 +531,6 @@
         "Твоё присутствие — это наслаждение, хочется быть рядом всегда 🌹",
         "Ты очень красивая, и это видно без всяких слов 💖"
     ];
-
-    console.log('Громкость:', volumeSlider);
-    console.log('Стиль громкости:', window.getComputedStyle(volumeSlider).display);
 
     menuToggle.addEventListener('click', () => {
         playlistSection.classList.toggle('hidden');
@@ -809,7 +804,6 @@
         if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration;
     });
 
-    // Регулировка громкости
     volumeSlider.addEventListener('input', (e) => {
         const vol = parseFloat(e.target.value);
         if (gainNode) {
@@ -817,7 +811,6 @@
         } else {
             audio.volume = vol;
         }
-        console.log('Громкость изменена:', vol);
     });
 
     createVisualizer();
