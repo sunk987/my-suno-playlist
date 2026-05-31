@@ -125,7 +125,6 @@
         #love-message {
             top: 70px;
             left: 20px;
-            right: 20px;
             max-width: calc(100vw - 40px);
             padding: 14px 18px;
             background: rgba(255, 65, 113, 0.35);
@@ -521,11 +520,13 @@
 </div>
 
 <script>
+    // ПЛЕЙЛИСТ — 5 песен
     const tracks = [
         { id: 1, title: "Заезженный диск", duration: "4:01", file: "track1.mp3" },
         { id: 2, title: "сумасшедший саксофон", duration: "4:39", file: "track2.mp3" },
         { id: 3, title: "Девчонка с картинки", duration: "3:53", file: "track3.mp3" },
-        { id: 4, title: "танцы на битом стекле", duration: "3:12", file: "track4.mp3" }
+        { id: 4, title: "танцы на битом стекле", duration: "3:12", file: "track4.mp3" },
+        { id: 5, title: "Километры сна", duration: "3:45", file: "track5.mp3" }
     ];
 
     let currentTrackIndex = -1;
@@ -561,23 +562,16 @@
     let heartPool = [];
     const MAX_HEARTS = 10;
 
-    // УНИВЕРСАЛЬНОЕ ПЕРЕТАСКИВАНИЕ ДЛЯ ВСЕХ ЭЛЕМЕНТОВ С КЛАССОМ .draggable
+    // УНИВЕРСАЛЬНОЕ ПЕРЕТАСКИВАНИЕ
     function initDraggable(element) {
         let isDragging = false;
         let startX, startY, startLeft, startTop;
-        let initialTransform;
 
         element.addEventListener('mousedown', startDrag);
         element.addEventListener('touchstart', startDrag, { passive: false });
 
         function startDrag(e) {
-            // Не перетаскиваем, если нажали на кнопку или ползунок внутри элемента
             if (e.target.closest('button:not(.menu-toggle)') || e.target.closest('input')) return;
-            
-            // Для кнопки меню разрешаем перетаскивание
-            if (element === menuToggle && e.target === menuToggle) {
-                // Разрешаем перетаскивание только если не клик (короткое нажатие)
-            }
             
             isDragging = true;
             element.classList.add('dragging');
@@ -590,10 +584,6 @@
             startLeft = rect.left;
             startTop = rect.top;
             
-            // Сохраняем текущую трансформацию
-            initialTransform = element.style.transform || '';
-            
-            // Убираем transform и переводим в абсолютные координаты
             element.style.transform = 'none';
             element.style.left = startLeft + 'px';
             element.style.top = startTop + 'px';
@@ -614,7 +604,6 @@
             let newLeft = startLeft + dx;
             let newTop = startTop + dy;
             
-            // Границы экрана
             const maxLeft = window.innerWidth - element.offsetWidth;
             const maxTop = window.innerHeight - element.offsetHeight;
             
@@ -632,14 +621,12 @@
             isDragging = false;
             element.classList.remove('dragging');
             
-            // Если это был короткий клик по кнопке меню — открываем плейлист
             if (element === menuToggle) {
                 const touch = e.changedTouches ? e.changedTouches[0] : e;
                 const dx = Math.abs(touch.clientX - startX);
                 const dy = Math.abs(touch.clientY - startY);
                 
                 if (dx < 10 && dy < 10) {
-                    // Это был клик, а не перетаскивание
                     togglePlaylist();
                 }
             }
@@ -651,7 +638,6 @@
         document.addEventListener('touchend', endDrag);
     }
 
-    // Инициализируем перетаскивание для всех draggable-элементов
     const draggableElements = document.querySelectorAll('.draggable');
     draggableElements.forEach(el => initDraggable(el));
 
@@ -659,12 +645,6 @@
         playlistSection.classList.toggle('hidden');
         menuToggle.innerHTML = playlistSection.classList.contains('hidden') ? '☰' : '✕';
     }
-
-    // Отдельный обработчик клика для меню (если не было перетаскивания)
-    menuToggle.addEventListener('click', (e) => {
-        // Этот обработчик сработает только если не было перетаскивания
-        e.stopPropagation();
-    });
 
     const loveMessages = [
         "Ты сегодня выглядишь просто волшебно ✨",
@@ -824,7 +804,6 @@
             score++;
             scoreCount.innerText = score;
             
-            // Анимация bump для счётчика
             scoreBox.classList.add('bump-animation');
             setTimeout(() => scoreBox.classList.remove('bump-animation'), 150);
         }
